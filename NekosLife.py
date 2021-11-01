@@ -34,5 +34,4 @@ class nkapimdMod(loader.Module):
         )
 
 
-types_of = ['femdom', 'tickle', 'classic', 'ngif', 'erofeet', 'meow', 'erok', 'poke', 'les', 'hololewd', 'lewdk', 'keta', 'feetg', 'nsfw_neko_gif', 'eroyuri', 'kiss', '_8ball', 'kuni', 'tits', 'pussy_jpg', 'cum_jpg', 'pussy', 'lewdkemo', 'lizard', 'slap', 'lewd', 'cum', 'cuddle', 'spank', 'smallboobs', 'goose',
-            'Random_hentai_gif', 'avatar', 'fox_girl', 'nsfw_avatar', 'hug', 'gecg', 'boobs', 'pat', 'feet', 'smug', 'kemonomimi', 'solog', 'holo', 'wallpaper', 'bj', 'woof', 'yuri', 'trap', 'anal', 'baka', 'blowjob', 'holoero', 'feed', 'neko', 'gasm', 'hentai', 'futanari', 'ero', 'solo', 'waifu', 'pwankg', 'eron', 'erokemo']
+types_of = ['smug', 'baka', 'tickle', 'slap', 'poke', 'pat', 'neko', 'nekoGif', 'meow', 'lizard', 'kiss', 'hug', 'foxGirl', 'feed', 'cuddle', 'kemonomimi', 'holo', 'woof', 'wallpaper', 'goose', 'gecg', 'avatar', 'waifu', 'randomHentaiGif', 'pussy', 'nekoGif', 'neko', 'lesbian', 'kuni', 'cumsluts', 'classic', 'boobs', 'bJ', 'anal', 'avatar', 'yuri', 'trap', 'tits', 'girlSoloGif', 'girlSolo', 'pussyWankGif', 'pussyArt', 'kemonomimi', 'kitsune', 'keta', 'holo', 'holoEro', 'hentai', 'futanari', 'femdom', 'feetGif', 'eroFeet', 'feet', 'ero', 'eroKitsune', 'eroKemonomimi', 'eroNeko', 'eroYuri', 'cumArts', 'blowJob', 'spank', 'gasm']
