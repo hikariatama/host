@@ -384,7 +384,7 @@ class RPMod(loader.Module):
             
             if status == 1:
                 if chat_rp.id not in ex:
-                    if message.sender_id == me.id:
+                    if message.sender_id == me.id or True:
                         for i in comand:
                             if detail[0] == i:
                                 if detail[0] in emojies.keys():
