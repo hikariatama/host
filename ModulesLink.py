@@ -11,9 +11,7 @@ class ModulesLinkMod(loader.Module):
         """Вывести ссылку на модуль"""
         args = utils.get_args_raw(message)
         if not args:
-            return await message.edit('Нет аргументов.')
-
-        await message.edit('Ищем...')
+            return await utils.answer(message, '🦊 <code>.help ModulesLink</code>')
 
         try:
             f = ' '.join([x.strings["name"] for x in self.allmodules.modules if args.lower() == x.strings["name"].lower()])
@@ -21,9 +19,9 @@ class ModulesLinkMod(loader.Module):
 
             link = str(r).split('(')[1].split(')')[0]
             if "http" not in link:
-                text = f"Модуль {f}:"
+                text = f"🦊 <b>{f}</b>"
             else:
-                text = f"<a href=\"{link}\">Ссылка</a> на {f}: <code>{link}</code>"
+                text = f"🦊 <b>{f}</b>: <code>.dlmod {link}</code>"
 
             out = io.BytesIO(r.__loader__.data)
             out.name = f + ".py"
@@ -32,4 +30,4 @@ class ModulesLinkMod(loader.Module):
             await message.respond(text, file=out)
             await message.delete()
         except:
-            return await message.edit("Произошла непредвиденная ошибка")
+            return await utils.answer(message, "🦊 <b>Модуль не найден</b>")
