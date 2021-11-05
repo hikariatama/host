@@ -5,7 +5,7 @@ import requests
 from .. import loader, utils
 from pydub import AudioSegment
 from gtts import gTTS
-from subprocess import DEVNULL, STDOUT, check_call
+
 
 def register(cb):
     cb(DttsMod())
@@ -20,7 +20,7 @@ class DttsMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig("TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m))
-        self.is_ffmpeg = check_call(['ffmpeg', '-version'], stdout=DEVNULL, stderr=STDOUT)
+        self.is_ffmpeg = os.system("ffmpeg -version") == 0
 
     async def say(self, message, speaker, text, file=".dtts.mp3"):
         reply = await message.get_reply_message()
