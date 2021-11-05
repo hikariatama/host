@@ -20,7 +20,6 @@ class DttsMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig("TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m))
-        self.is_ffmpeg = os.system("ffmpeg -version") == 0
         self.is_ffmpeg = check_call(['ffmpeg', '-version'], stdout=DEVNULL, stderr=STDOUT)
 
     async def say(self, message, speaker, text, file=".dtts.mp3"):
