@@ -20,6 +20,8 @@ import telethon
 import io
 import time
 import json
+import logging
+logger = logging.getLogger(__name__)
 try:
     import hashlib
 except:
@@ -82,6 +84,7 @@ class HidePicsMod(loader.Module):
     async def client_ready(self, client, db):
         self.db = db
         self.client = client
+        self.chats = db.get('HidePics', 'chats', {})
         self.db.set('HidePics', 'wait', False)
 
     async def hpnewcatcmd(self, message):
@@ -91,7 +94,9 @@ class HidePicsMod(loader.Module):
             return
 
         # await self.client(telethon.functions.messages.CreateChatRequest(users=[], title='ftg-hidepics-' + args))
-        await self.client(telethon.functions.channels.CreateChannelRequest(f"ftg-hidepics-{args}", "Just friendly chat"))
+        ch = (await self.client(telethon.functions.channels.CreateChannelRequest(f"ftg-hidepics-{args}", "Just friendly chat"))).updates[1].channel_id
+        self.chats[ch] = f"ftg-hidepics-{args}"
+        self.db.set('HidePics', 'chats', self.chats)
         await utils.answer(message, self.strings('cat_created', message))
 
 
@@ -158,12 +163,15 @@ class HidePicsMod(loader.Module):
         
 
     async def watcher(self, message):
-        entity = await self.client.get_entity(message.peer_id)
-        if type(entity) is not telethon.tl.types.Channel and type(entity) is not telethon.tl.types.Chat:
-            return
+        try:
+            entity = message.peer_id
+            if type(entity) is not telethon.tl.types.PeerChannel:
+                return
 
-        title = entity.title
-        if not title.startswith('ftg-hidepics-'):
+            title = self.chats[str(entity.channel_id)]
+            if not title.startswith('ftg-hidepics-'):
+                return
+        except:
             return
 
         while self.db.get('HidePics', 'wait', False):
