@@ -253,7 +253,7 @@ class AntiLogspamMod(loader.Module):
             return
 
         try:
-            limit, time_sample = list(map(int, args))
+            limit, time_sample = list(map(int, args.split()))
         except:
             await utils.answer(message, self.strings('args', message))
             return
