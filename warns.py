@@ -1,216 +1,260 @@
-# -*- coding: utf-8 -*-
+"""
+    Copyright 2021 t.me/innocoffee
+    Licensed under the Apache License, Version 2.0
+    
+    Author is not responsible for any consequencies caused by using this
+    software or any of its parts. If you have any questions or wishes, feel
+    free to contact Dan by sending pm to @innocoffee_alt.
+"""
 
-# Module author: @ftgmodulesbyfl1yd
+#<3 title: InnoWarns
+#<3 pic: https://img.icons8.com/fluency/48/000000/mail-error.png
+#<3 desc: Система предупреждений для твоего чата
 
-from telethon.errors import UserAdminInvalidError
-from telethon.tl.functions.channels import EditBannedRequest
-from telethon.tl.types import ChatBannedRights
-
-from .. import utils, loader
+from .. import loader, utils
+import time
+import asyncio
+import re
+import json
+import requests
+import telethon
+import io
 
 
 @loader.tds
-class WarnsMod(loader.Module):
-	"""Система предупреждений."""
-	strings = {'name': 'Warns'}
+class InnoWarnsMod(loader.Module):
+    """Warns system for your chat"""
+    strings = {
+        "name": "InnoWarns", 
+        'args': '🦊 <b>Args not specified</b>',
+        'no_reason': 'Not specified',
+        'warn': '🦊 <b><a href="tg://user?id={}">{}</a></b> got {}/{} warn\nReason: <b>{}</b>',
+        'chat_not_in_db': '🦊 <b>This chat has no warns yet</b>',
+        'no_warns': '🦊 <b><a href="tg://user?id={}">{}</a> has no warns yet</b>', 
+        'warns': '🦊 <b><a href="tg://user?id={}">{}</a> has {}/{} warns</b>\n    🏴󠁧󠁢󠁥󠁮󠁧󠁿 <i>{}</i>',
+        'warns_adm': '🦊 Warns in this chat:\n',
+        'dwarn': '🦊 <b>Removed last warn from <a href="tg://user?id={}">{}</a>',
+        'clrwarns': '🦊 <b>Removed all warns from <a href="tg://user?id={}">{}</a>',
+        'new_a': '🦊 <b>New action when warns limit is reached for this chat: "{}"</b>',
+        'new_l': '🦊 <b>New warns limit for this chat: "{}"</b>',
+        'warns_limit': '🦊 <b><a href="tg://user?id={}">{}</a> reached warns limit.\nAction: I {}</b>'
+    }
 
-	async def client_ready(self, client, db):
-		self.db = db
 
-	async def warncmd(self, message):
-		"""Выдать варн. Используй: .warn <@ или реплай>."""
-		if message.is_private:
-			return await message.edit("<b>Это не чат!</b>")
-		chat = await message.get_chat()
-		if not chat.admin_rights and not chat.creator:
-			return await message.edit("<b>Я не админ здесь.</b>")
-		else:
-			if not chat.admin_rights.ban_users:
-				return await message.edit("<b>У меня нет нужных прав.</b>")
+    async def client_ready(self, client, db):
+        self.db = db
+        self.client = client
+        self.chats = db.get('InnoWarns', 'chats', {})
 
-		warns = self.db.get("Warns", "warns", {})
-		args = utils.get_args(message)
-		reply = await message.get_reply_message()
-		chatid = str(message.chat_id)
-		reason = "Необоснованно"
 
-		if not args and not reply:
-			return await message.edit("<b>Нет аргументов или реплая.</b>")
+    async def warncmd(self, message):
+        """.warn <reply | user_id | username> <reason | optional> - Warn specified user"""
+        if message.is_private:
+            await message.delete()
+            return
 
-		if reply:
-			user = await message.client.get_entity(reply.sender_id)
-			args = utils.get_args_raw(message)
-			if args:
-				reason = args
-		else:
-			user = await message.client.get_entity(args[0] if not args[0].isnumeric() else int(args[0]))
-			if args:
-				if len(args) == 1:
-					args = utils.get_args_raw(message)
-					user = await message.client.get_entity(args if not args.isnumeric() else int(args))
-				elif len(args) >= 2:
-					reason = utils.get_args_raw(message).split(' ', 1)[1]
-		userid = str(user.id)
-		me = await message.client.get_me()
-		if me.id == user.id:
-			return await message.edit("<b>Ты не можешь себе давать предупреждение!</b>")
+        cid = str(utils.get_chat_id(message))
+        args = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        user = None
+        if reply:
+            user = await self.client.get_entity(reply.from_id)
+            if args:
+                reason = args
+            else:
+                reason = self.strings('no_reason')
+        else:
+            try:
+                u = args.split(maxsplit=1)[0]
+                try:
+                    u = int(u)
+                except TypeError:
+                    pass
 
-		if chatid not in warns:
-			warns.update({chatid: {"limit": 3, "action": "ban"}})
-		if userid not in warns[chatid]:
-			warns[chatid].update({userid: []})
+                user = await self.client.get_entity(u)
+            except IndexError:
+                return await utils.answer(message, self.strings('args', message))
 
-		if not args and not reply:
-			return await message.edit("<b>Нет аргументов или реплая.</b>")
+            try:
+                reason = args.split(maxsplit=1)[1]
+            except IndexError:
+                reason = self.strings('no_reason')
 
-		warns[chatid][userid].append(reason)
-		count = len(warns[chatid][userid])
+        if cid not in self.chats:
+            self.chats[cid] = {
+                'a': 'mute', 
+                'l': 5,
+                'w': {}
+            }
 
-		if count == warns[chatid]["limit"]:
-			warns[chatid].pop(userid)
-			self.db.set("Warns", "warns", warns)
-			try:
-				if warns[chatid]["action"] == "kick":
-					await message.client.kick_participant(int(chatid), user.id)
-				elif warns[chatid]["action"] == "ban":
-					await message.client(EditBannedRequest(int(chatid), user.id,
-					                                       ChatBannedRights(until_date=None, view_messages=True)))
-				elif warns[chatid]["action"] == "mute":
-					await message.client(EditBannedRequest(int(chatid), user.id,
-					                                       ChatBannedRights(until_date=True, send_messages=True)))
-			except UserAdminInvalidError:
-				return await message.edit("<b>У меня нет достаточных прав.</b>")
-			else:
-				return await message.edit(
-					f"<b>{user.first_name} получил {count}/{warns[chatid]['limit']} предупреждения, и был ограничен в чате.</b>")
-		self.db.set("Warns", "warns", warns)
-		await message.edit(
-			f"<b><a href=\"tg://user?id={user.id}\">{user.first_name}</a> получил {count}/{warns[chatid]['limit']} предупреждений.</b>" + (
-				f"\nПричина: {reason}.</b>" if reason != "Необоснованно" else ""))
+        if user.id not in self.chats[cid]['w']:
+            self.chats[cid]['w'][user.id] = []
+        self.chats[cid]['w'][user.id].append(reason)
 
-	async def warnslimitcmd(self, message):  # sourcery skip: last-if-guard
-		"""Установить лимит предупреждений. Используй: .warnslimit <кол-во:int>."""
-		if message.is_private:
-			return await message.edit("<b>Это не чат!</b>")
+        if len(self.chats[cid]['w'][user.id]) >= self.chats[cid]['l']:
+            action = self.chats[cid]['a']
+            user_name = user.first_name
+            user = user.id
+            if action == "kick":
+                await self.client.kick_participant(int(cid), int(user))
+                await self.client.send_message(int(cid), self.strings('warns_limit').format(user, user_name, 'kicked him'))
+            elif action == "ban":
+                await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, view_messages=True, send_messages=True, send_media=True, send_stickers=True, send_gifs=True, send_games=True, send_inline=True, embed_links=True)))
+                await self.client.send_message(int(cid), self.strings('warns_limit').format(user, user_name, 'banned him for 15 mins'))
+            elif action == "mute":
+                await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, send_messages=True)))
+                await self.client.send_message(int(cid), self.strings('warns_limit').format(user, user_name, 'muted him for 15 mins'))
+            
+            await message.delete()
+            self.chats[cid]['w'][user] = []
+        else:
+            await utils.answer(message, self.strings('warn', message).format(user.id, user.first_name, len(self.chats[cid]['w'][user.id]), self.chats[cid]['l'], reason))
+        self.db.set('InnoWarns', 'chats', self.chats)
 
-		warns = self.db.get("Warns", "warns", {})
-		args = utils.get_args_raw(message)
-		chatid = str(message.chat_id)
+    @loader.unrestricted
+    async def warnscmd(self, message):
+        """.warns <reply | user_id | username | optional> - Show warns in chat, or for specified user"""
+        if message.is_private:
+            await message.delete()
+            return
 
-		if chatid not in warns:
-			warns.update({chatid: {"limit": 3}})
-		if not args:
-			return await message.edit(f"<b>Лимит предупреждений в этом чате: {warns[chatid]['limit']}</b>")
+        cid = utils.get_chat_id(message)
+        async def check_admin(user_id):
+            async for member in self.client.iter_participants(cid, filter=telethon.tl.types.ChannelParticipantsAdmins):
+                if member.id == user_id:
+                    return True
+            return False
 
-		try:
-			warns[chatid].update({"limit": int(args)})
-			self.db.set("Warns", "warns", warns)
-			return await message.edit(
-				f"<b>Лимит предупреждений в этом чате был установлен на: {warns[chatid]['limit']}</b>")
-		except ValueError:
-			return await message.edit("Значение должно быть числом.")
+        async def send_user_warns(usid):
+            if str(cid) not in self.chats:
+                await utils.answer(message, self.strings('chat_not_in_db', message))
+                return
+            elif usid not in self.chats[str(cid)]['w'] or len(self.chats[str(cid)]['w'][usid]) == 0:
+                user_obj = await self.client.get_entity(usid)
+                await utils.answer(message, self.strings('no_warns', message).format(user_obj.id, user_obj.first_name))
+            else:
+                user_obj = await self.client.get_entity(usid)
+                await utils.answer(message, self.strings('warns', message).format(user_obj.id, user_obj.first_name, len(self.chats[str(cid)]['w'][usid]), self.chats[str(cid)]['l'], '\n    🏴󠁧󠁢󠁥󠁮󠁧󠁿 '.join(self.chats[str(cid)]['w'][usid])))
 
-	async def warnscmd(self, message):
-		"""Посмотреть кол-во варнов. Используй: .warns <@ или реплай> или <list>."""
-		if message.is_private:
-			return await message.edit("<b>Это не чат!</b>")
-		args = utils.get_args_raw(message)
-		reply = await message.get_reply_message()
-		chatid = str(message.chat_id)
-		warns = self.db.get("Warns", "warns", {})
+        if not await check_admin(message.from_id):
+            await send_user_warns(message.from_id)
+        else:
+            reply = await message.get_reply_message()
+            args = utils.get_args_raw(message)
+            if not reply and not args:
+                res = self.strings('warns_adm', message)
+                for user, warns in self.chats[str(cid)]['w'].items():
+                    user_obj = await self.client.get_entity(user)
+                    res += "🐺 <b><a href=\"tg://user?id=" + str(user_obj.id) + "\">" + getattr(user_obj, 'first_name', '') + ' ' + (user_obj.last_name if getattr(user_obj, 'last_name', '') is not None else '') + '</a></b>\n'
+                    for warn in warns:
+                        res += "<code>   </code>🏴󠁧󠁢󠁥󠁮󠁧󠁿 <i>" + warn + '</i>\n'
 
-		if not args and not reply:
-			return await message.edit("<b>Нет аргументов или реплая.</b>")
+                await utils.answer(message, res)
+                return
+            elif reply:
+                await send_user_warns(reply.from_id)
+            elif args:
+                await send_user_warns(args)
 
-		if args == "list":
-			users = ""
-			try:
-				for _ in warns[chatid]:
-					if _ not in ["limit", "action"]:
-						user = await message.client.get_entity(int(_))
-						users += f"• <a href='tg://user?id={int(_)}'>{user.first_name}</a> <b>| [</b><code>{_}</code><b>]</b>\n"
-				return await message.edit(f"<b>Список тех, кто получил предупреждения:\n\n{users}")
-			except KeyError:
-				return await message.edit("<b>В этом чате никто не получал предупреждения.</b>")
+    async def dwarncmd(self, message):
+        """.dwarn <reply | user_id | username> - Remove last warn from user"""
+        if message.is_private:
+            await message.delete()
+            return
 
-		try:
-			if args:
-				user = await message.client.get_entity(int(args) if args.isnumeric() else args)
-			else:
-				user = await message.client.get_entity(reply.sender_id)
-			userid = str(user.id)
-		except ValueError:
-			return await message.edit("<b>Не удалось найти этого пользователя.</b>")
+        cid = str(utils.get_chat_id(message))
+        args = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        user = None
+        if reply:
+            user = await self.client.get_entity(reply.from_id)
+        else:
+            try:
+                user = await self.client.get_entity(args)
+            except IndexError:
+                return await utils.answer(message, self.strings('args', message))
 
-		try:
-			if userid not in warns[chatid]:
-				return await message.edit("<b>Этот пользователь не получал предупреждения.</b>")
+        if cid not in self.chats:
+            return await utils.answer(message, self.strings('chat_not_in_db', message))
 
-			msg = "".join(f"<b>{count})</b> {_}\n"
-			              for count, _ in enumerate(warns[chatid][userid], start=1))
-			return await message.edit(
-				f"<b>Предупреждения <a href=\"tg://user?id={user.id}\">{user.first_name}</a>:\n\n{msg}</b>")
-		except KeyError:
-			return await message.edit(
-				f"<b>У <a href=\"tg://user?id={user.id}\">{user.first_name}</a> нет предупреждений.</b>")
+        if user.id not in self.chats[cid]['w']:
+            return await utils.answer(message, self.strings('no_warns', user.id, user.first_name))
 
-	async def swarncmd(self, message):
-		"""Изменить режим ограничения. Используй: .swarn <kick/ban/mute/none>."""
-		if message.is_private:
-			return await message.edit("<b>Это не чат!</b>")
-		args = utils.get_args_raw(message)
-		chatid = str(message.chat_id)
-		warns = self.db.get("Warns", "warns", {})
+        del self.chats[cid]['w'][user.id][-1]
+        await utils.answer(message, self.strings('dwarn', message).format(user.id, user.first_name))
+        self.db.set('InnoWarns', 'chats', self.chats)
 
-		if chatid not in warns:
-			warns.update({chatid: {"action": "ban"}})
+    async def clrwarnscmd(self, message):
+        """.clrwarns <reply | user_id | username> - Remove all warns from user"""
+        if message.is_private:
+            await message.delete()
+            return
 
-		if args:
-			if args == "kick":
-				warns[chatid].update({"action": "kick"})
-			elif args == "ban":
-				warns[chatid].update({"action": "ban"})
-			elif args == "mute":
-				warns[chatid].update({"action": "mute"})
-			elif args == "none":
-				warns[chatid].update({"action": "none"})
-			else:
-				return await message.edit(
-					"<b>Такого режима нет в списке.\nДоступные режимы: kick/ban/mute/none.</b>")
-			self.db.set("AntiMention", "action", warns)
-			return await message.edit(
-				f"<b>Теперь при достижения лимита предупреждений будет выполняться действие: {warns[chatid]['action']}.</b>")
-		else:
-			return await message.edit(
-				f"<b>При достижения лимита предупреждений будет выполняться действие: {warns[chatid]['action']}.</b>")
+        cid = str(utils.get_chat_id(message))
+        args = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        user = None
+        if reply:
+            user = await self.client.get_entity(reply.from_id)
+        else:
+            try:
+                user = await self.client.get_entity(args)
+            except IndexError:
+                return await utils.answer(message, self.strings('args', message))
 
-	async def clearwarnscmd(self, message):
-		"""Очистить все варны. Используй: .clearwarns <@ или реплай>."""
-		if message.is_private:
-			return await message.edit("<b>Это не чат!</b>")
-		args = utils.get_args_raw(message)
-		reply = await message.get_reply_message()
-		chatid = str(message.chat_id)
-		warns = self.db.get("Warns", "warns", {})
-		if not args and not reply:
-			return await message.edit("<b>Нет аргументов или реплая.</b>")
+        if cid not in self.chats:
+            return await utils.answer(message, self.strings('chat_not_in_db', message))
 
-		try:
-			if args:
-				user = await message.client.get_entity(int(args) if args.isnumeric() else args)
-			else:
-				user = await message.client.get_entity(reply.sender_id)
-			userid = str(user.id)
-		except ValueError:
-			return await message.edit("<b>Не удалось найти этого пользователя.</b>")
+        if user.id not in self.chats[cid]['w']:
+            return await utils.answer(message, self.strings('no_warns').format(user.id, user.first_name))
 
-		try:
-			warns[chatid][userid].pop()
-			if len(warns[chatid][userid]) == 0:
-				warns[chatid].pop(userid)
-			self.db.set("Warns", "warns", warns)
-			return await message.edit(
-				f"<b>У <a href=\"tg://user?id={user.id}\">{user.first_name}</a> удалено последнее предупреждение.</b>")
-		except KeyError:
-			return await message.edit(
-				f"<b>У <a href=\"tg://user?id={user.id}\">{user.first_name}</a> нет предупреждений.</b>")
+        del self.chats[cid]['w'][user.id]
+        await utils.answer(message, self.strings('clrwarns', message).format(user.id, user.first_name))
+        self.db.set('InnoWarns', 'chats', self.chats)
+
+    async def warnsactioncmd(self, message):
+        """.warnsaction <mute | kick | ban> - Action when warns limit is reached"""
+        if message.is_private:
+            await message.delete()
+            return
+
+        args = utils.get_args_raw(message)
+        if not args or args not in ['mute', 'kick', 'ban']:
+            return await utils.answer(message, self.strings('args', message))
+
+        cid = utils.get_chat_id(message)
+
+        if str(cid) not in self.chats:
+            self.chats[str(cid)] = {
+                'a': 'mute', 
+                'l': 5,
+                'w': {}
+            }
+
+        self.chats[str(cid)]['a'] = args
+        await utils.answer(message, self.strings('new_a', message).format(args))
+
+    async def warnslimitcmd(self, message):
+        """.warnslimit <limit:int> - Warns limit for current chat"""
+        if message.is_private:
+            await message.delete()
+            return
+
+        args = utils.get_args_raw(message)
+        try:
+            args = int(args)
+        except:
+            return await utils.answer(message, self.strings('args', message))
+
+        cid = utils.get_chat_id(message)
+
+        if str(cid) not in self.chats:
+            self.chats[str(cid)] = {
+                'a': 'mute', 
+                'l': 5,
+                'w': {}
+            }
+
+        self.chats[str(cid)]['l'] = args
+        await utils.answer(message, self.strings('new_l', message).format(args))
+
