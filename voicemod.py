@@ -84,6 +84,10 @@ class VoiceMod(loader.Module):
             self.group_calls[str(chat)] = GroupCallFactory(
                 m.client, pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.TELETHON).get_file_group_call()
 
+    async def client_ready(self, client, db):
+        self.client = client
+        self.db = db
+
     async def vplaycmd(self, m: types.Message):
         """.vplay [chat (optional)] <link/reply_to_audio>
         Play audio in VC"""
@@ -227,19 +231,20 @@ class VoiceMod(loader.Module):
         debug"""
         await utils.answer(m, f'DEBUG : {str(self.group_calls)}')
 
+    @loader.unrestricted
     async def smcmd(self, message):
         """.sm 
         to find music."""
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not args:
-            return await message.edit("<b>No args.</b>") 
+            return await utils.answer(message, "<b>No args.</b>") 
         try:
-            await message.edit("<b>Loading...</b>")
-            music = await message.client.inline_query('lybot', args)
+            await utils.answer(message, "<b>Loading...</b>")
+            music = await self.client.inline_query('lybot', args)
             await message.delete()
-            await message.client.send_file(message.to_id, music[0].result.document, reply_to=reply.id if reply else None)
-        except: return await message.client.send_message(message.chat_id, f"<b> Music named <code> {args} </code> not found. </b>")  
+            await self.client.send_file(message.to_id, music[0].result.document, reply_to=reply.id if reply else None)
+        except: return await self.client.send_message(message.chat_id, f"<b> Music named <code> {args} </code> not found. </b>")  
 
     async def shazamcmd(self, message):
         """.shazam <reply to audio> - recognize track"""
@@ -249,11 +254,11 @@ class VoiceMod(loader.Module):
             shazam = Shazam(s.track.read())
             recog = shazam.recognizeSong()
             track = next(recog)[1]['track']
-            await message.client.send_file(message.to_id, file=track['images']['background'],
+            await self.client.send_file(message.to_id, file=track['images']['background'],
                    caption=self.tag + "recognized track: " + track['share']['subject'],
                    reply_to=s.reply.id)
             await message.delete()
-        except: await message.edit(self.tag + "Could not recognize...")
+        except: await utils.answer(message, self.tag + "Could not recognize...")
 
 
 async def get_audio_shazam(message):
@@ -267,7 +272,7 @@ async def get_audio_shazam(message):
 		await utils.answer(message, "<b>Downloading...</b>")
 		ae.track = io.BytesIO(await reply.download_media(bytes))
 		ae.reply = reply
-		await message.edit("<b>Recognizing...</b>")
+		await utils.answer(message, "<b>Recognizing...</b>")
 		return ae
 	else:
 		await utils.answer(message, "<b>reply to audio...</b>")
