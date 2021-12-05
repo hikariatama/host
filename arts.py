@@ -16,7 +16,7 @@ class ArtsMod(loader.Module):
         """Используй .vjuh <текст>."""
         text = utils.get_args_raw(message)
         if not text:
-            await message.edit('<b>Нет текста после команды :c</b>')
+            await utils.answer(message, '<b>Нет текста после команды :c</b>')
             return
         else:
             vjuh = ("<code>.∧＿∧\n"
@@ -26,10 +26,10 @@ class ArtsMod(loader.Module):
                     "             .· ´¸.·*´¨) ¸.·*¨)\n"
                     "                     (¸.·´ (¸.·'* ☆\n\n"
                     "Вжух и ты </code>" + f"<code>{text}</code>")
-            await message.edit(vjuh)
+            await utils.answer(message, vjuh)
 
         if text == "podpiska":
-            await message.edit("<code>.∧＿∧\n"
+            await utils.answer(message, "<code>.∧＿∧\n"
                                "( ･ω･｡)つ━☆・*。\n"
                                "⊂  ノ    ・゜ .\n"
                                "しーＪ   °。  *´¨)\n"
@@ -42,7 +42,7 @@ class ArtsMod(loader.Module):
         """Используй .cowsay <текст>."""
         text = utils.get_args_raw(message)
         if not text:
-            await message.edit('<b>Нет текста после команды :c</b>')
+            await utils.answer(message, '<b>Нет текста после команды :c</b>')
             return
         else:
             cowsay = ("<code> "
@@ -53,7 +53,7 @@ class ArtsMod(loader.Module):
                       "         (__)\       )\/\n"
                       "             ||----w||\n"
                       "	            ||     ||</code>")
-            await message.edit(cowsay)
+            await utils.answer(message, cowsay)
 
 
     async def padayucmd(self, message):
@@ -89,7 +89,7 @@ class ArtsMod(loader.Module):
                       "┛┗┛┗┛┃\n"
                       "┓┏┓┏┓┃\n"
                       "┛┗┛┗┛┃\n")
-            await message.edit(padayu)
+            await utils.answer(message, padayu)
         else:
             padayu = ("┓┏┓┏┓┃\n"
                       "┛┗┛┗┛┃\n"
@@ -119,7 +119,7 @@ class ArtsMod(loader.Module):
                       "┛┗┛┗┛┃\n"
                       "┓┏┓┏┓┃\n"
                       "┛┗┛┗┛┃\n")
-            await message.edit(padayu)
+            await utils.answer(message, padayu)
 
 
     async def priletelcmd(self, message):
@@ -171,7 +171,7 @@ class ArtsMod(loader.Module):
                         f"╬═╬☻/ - <b>{text}</b>\n"
                         "╬═╬/▌\n"
                         "╬═╬/ \ ")
-            await message.edit(prilitel)
+            await utils.answer(message, prilitel)
         else:
             prilitel = ("▬▬▬.◙.▬▬▬\n"
                         "  ═▂▄▄▓▄▄▂\n"
@@ -217,7 +217,7 @@ class ArtsMod(loader.Module):
                         f"╬═╬☻/ - <b>{text}</b>\n"
                         "╬═╬/▌\n"
                         "╬═╬/ \ ")
-            await message.edit(prilitel)
+            await utils.answer(message, prilitel)
 
 
     async def huytebecmd(self, message):
@@ -247,7 +247,7 @@ class ArtsMod(loader.Module):
                        "..................▀▌▒▀▒▐▀\n"
                        "\n"
                        f"<b>{text}</b>")
-            await message.edit(huytebe)
+            await utils.answer(message, huytebe)
         else:
             huytebe = ("...............▄▄▄▄▄\n"
                        "..............▄▌░░░░▐▄\n"
@@ -271,7 +271,7 @@ class ArtsMod(loader.Module):
                        "..................▀▌▒▀▒▐▀\n"
                        "\n"
                        f"<b>{text}</b>")
-            await message.edit(huytebe)
+            await utils.answer(message, huytebe)
 
 
     async def lolcmd(self, message):
@@ -281,7 +281,7 @@ class ArtsMod(loader.Module):
                "┃╱┗━┓┃╱┃┃╱┃┃╱┗━┓\n"
                "┃╱╱╱┃┃╱╰╯╱┃┃╱╱╱┃\n"
                "┗━━━┛╰━━━━╯┗━━━┛\n")
-        await message.edit(lol)
+        await utils.answer(message, lol)
 
 
     async def fuckyoucmd(self, message):
@@ -294,7 +294,7 @@ class ArtsMod(loader.Module):
                    "┣┓┃┃┃┃┣┫┃┏┻┻┫\n"
                    "┃┃┃┃┃┃┃┃┣┻┫┃┃\n"
                    "┗━┻━┻━┻┛┗━━━┛\n")
-        await message.edit(fuckyou)
+        await utils.answer(message, fuckyou)
 
 
     async def housecmd(self, message):
@@ -306,7 +306,7 @@ class ArtsMod(loader.Module):
                  "▔▏▂┗┓▂▕▔┛▂┏▔▂▕▔\n"
                  "▕▕╋▏▕╋▏▏▕┏▏▕╋▏▏\n"
                  "▕┓▔┗┓▔┏▏▕┗▏ ┓▔┏\n")
-        await message.edit(house)
+        await utils.answer(message, house)
 
 
     async def hellocmd(self, message):
@@ -317,7 +317,7 @@ class ArtsMod(loader.Module):
                  "┈┃┏┓┃┏┛┃┃┃┃┃┃┃┈\n"
                  "┈┃┃┃┃┗┓┗┫┗┫╰╯┃┈\n"
                  "┈┗┛┗┻━┻━┻━┻━━┛┈\n")
-        await message.edit(hello)
+        await utils.answer(message, hello)
 
 
     async def coffeecmd(self, message):
@@ -331,7 +331,7 @@ class ArtsMod(loader.Module):
                       "█░░░░░█─█\n"
                       "▀▄▄▄▄▄▀▀\n\n"
                       f"<b>{text}</b>")
-            await message.edit(coffee)
+            await utils.answer(message, coffee)
         else:
             coffee = ("─▄▀─▄▀\n"
                       "──▀──▀\n"
@@ -339,7 +339,7 @@ class ArtsMod(loader.Module):
                       "█░░░░░█─█\n"
                       "▀▄▄▄▄▄▀▀\n\n"
                       f"<b>{text}</b>")
-            await message.edit(coffee)
+            await utils.answer(message, coffee)
 
 
     async def tvcmd(self, message):
@@ -353,7 +353,7 @@ class ArtsMod(loader.Module):
                   "█░▒░▒░▒█▀█░░█░░█\n"
                   "█▄▄▄▄▄▄███══════\n\n"
                   f"<b>{text}</b>")
-            await message.edit(tv)
+            await utils.answer(message, tv)
         else:
             tv = ("░▀▄░░▄▀\n"
                   "▄▄▄██▄▄▄▄▄░▀█▀▐░▌\n"
@@ -361,7 +361,7 @@ class ArtsMod(loader.Module):
                   "█░▒░▒░▒█▀█░░█░░█\n"
                   "█▄▄▄▄▄▄███══════\n\n"
                   f"<b>{text}</b>")
-            await message.edit(tv)
+            await utils.answer(message, tv)
 
 
     async def grencmd(self, message):
@@ -375,7 +375,7 @@ class ArtsMod(loader.Module):
                     "█▐█▄───▄█▌\n"
                     "▀─▀██▄██▀\n\n"
                     f"<b>{text}</b>")
-            await message.edit(gren)
+            await utils.answer(message, gren)
         else:
             gren = ("─▄▀▀███═◯\n"
                     "▐▌▄▀▀█▀▀▄\n"
@@ -383,7 +383,7 @@ class ArtsMod(loader.Module):
                     "█▐█▄───▄█▌\n"
                     "▀─▀██▄██▀\n\n"
                     f"<b>{text}</b>")
-            await message.edit(gren)
+            await utils.answer(message, gren)
 
 
     async def bruhcmd(self, message):
@@ -394,7 +394,7 @@ class ArtsMod(loader.Module):
                 "┃╭━╮┃╭┫┃┃┃╭╮┃\n"
                 "┃╰━╯┃┃┃╰╯┃┃┃┃\n"
                 "╰━━━┻╯╰━━┻╯╰╯\n")
-        await message.edit(bruh)
+        await utils.answer(message, bruh)
 
 
     async def unocmd(self, message):
@@ -412,7 +412,7 @@ class ArtsMod(loader.Module):
                "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢣⠞⢺⣿⡇\n"
                "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢡⡴⣣⣿⣿⡇\n"
                "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣿⣿⣿⡇")
-        await message.edit(uno)
+        await utils.answer(message, uno)
 
 
     async def huycmd(self, message):
@@ -434,7 +434,7 @@ class ArtsMod(loader.Module):
                "    🍆🍆        🍆🍆")
         if emoji:
             huy = huy.replace('🍆', emoji)
-        await message.edit(huy)
+        await utils.answer(message, huy)
 
 
     async def impscmd(self, message):
@@ -455,7 +455,7 @@ class ArtsMod(loader.Module):
                f"　 。     {randint(1, 5)} impostor(s) remains.　　　.　 　.\n"
                ",　　　　.　 .　　       .        •   •    。.\n"
                "。  •　   .   　ﾟ 　  •  　ﾟ .        .    　.</code>")
-        await message.edit(imp)
+        await utils.answer(message, imp)
 
 
     async def fcmd(self, message):

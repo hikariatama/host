@@ -240,10 +240,13 @@ class VoiceMod(loader.Module):
         if not args:
             return await utils.answer(message, "<b>No args.</b>") 
         try:
-            await utils.answer(message, "<b>Loading...</b>")
+            message = await utils.answer(message, "<b>Loading...</b>")
+            try:
+                message = message[0]
+            except: pass
             music = await self.client.inline_query('lybot', args)
             await message.delete()
-            await self.client.send_file(message.to_id, music[0].result.document, reply_to=reply.id if reply else None)
+            await self.client.send_file(message.peer_id, music[0].result.document, reply_to=reply.id if reply else None)
         except: return await self.client.send_message(message.chat_id, f"<b> Music named <code> {args} </code> not found. </b>")  
 
     async def shazamcmd(self, message):
@@ -254,7 +257,7 @@ class VoiceMod(loader.Module):
             shazam = Shazam(s.track.read())
             recog = shazam.recognizeSong()
             track = next(recog)[1]['track']
-            await self.client.send_file(message.to_id, file=track['images']['background'],
+            await self.client.send_file(message.peer_id, file=track['images']['background'],
                    caption=self.tag + "recognized track: " + track['share']['subject'],
                    reply_to=s.reply.id)
             await message.delete()
