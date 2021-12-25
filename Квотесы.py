@@ -156,7 +156,10 @@ class ShitQuotesMod(loader.Module):
         quote.name = "SQuote" + (".png" if isFile else ".webp")
 
         await utils.answer(message, quote, force_document = isFile)
-        return await message[-1].delete()
+        try:
+            return await message[-1].delete()
+        except:
+            pass
 
 
     async def quote_parse_messages(self, message: Message, count: int):

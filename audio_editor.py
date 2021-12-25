@@ -32,8 +32,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def basscmd(self, m):
-        """.bass [level bass'а 2-100 (Default 2)] <reply to audio>
-        BassBoost"""
+        """[level bass'а 2-100 (Default 2)] <reply to audio> - BassBoost"""
         args = utils.get_args_raw(m)
         if not args:
             lvl = 2.0
@@ -51,8 +50,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def fvcmd(self, m):
-        """.fv [level 2-100 (Default 25)] <reply to audio>
-        Distort"""
+        """[level 2-100 (Default 25)] <reply to audio> - Distort"""
         args = utils.get_args_raw(m)
         if not args:
             lvl = 25.0
@@ -68,8 +66,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def echoscmd(self, m):
-        """.echos <reply to audio>
-            Echo effect"""
+        """<reply to audio> - Echo effect"""
         audio = await get_audio(self, m, "Echo")
         if not audio:
             return
@@ -85,8 +82,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def volupcmd(self, m):
-        """.volup <reply to audio>
-            VolUp 10dB"""
+        """<reply to audio> - VolUp 10dB"""
         audio = await get_audio(self, m, "+10dB")
         if not audio:
             return
@@ -95,8 +91,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def voldwcmd(self, m):
-        """.voldw <reply to audio>
-            VolDw 10dB"""
+        """<reply to audio> - VolDw 10dB"""
         audio = await get_audio(self, m, "-10dB")
         if not audio:
             return
@@ -105,8 +100,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def revscmd(self, m):
-        """.revs <reply to audio>
-            Reverse audio"""
+        """<reply to audio> - Reverse audio"""
         audio = await get_audio(self, m, "Reverse")
         if not audio:
             return
@@ -115,8 +109,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def repscmd(self, m):
-        """.reps <reply to audio>
-            Repeat audio 2 times"""
+        """<reply to audio> - Repeat audio 2 times"""
         audio = await get_audio(self, m, "Repeat")
         if not audio:
             return
@@ -125,8 +118,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def slowscmd(self, m):
-        """.slows <reply to audio>
-            SlowDown 0.5x"""
+        """<reply to audio> - SlowDown 0.5x"""
         audio = await get_audio(self, m, "SlowDown")
         if not audio:
             return
@@ -137,8 +129,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def fastscmd(self, m):
-        """.fasts <reply to audio>
-        SpeedUp 1.5x"""
+        """<reply to audio> - SpeedUp 1.5x"""
         audio = await get_audio(self, m, "SpeedUp")
         if not audio:
             return
@@ -150,8 +141,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def rightscmd(self, m):
-        """.rights <reply to audio>
-            Push sound to right channel"""
+        """<reply to audio> - Push sound to right channel"""
         audio = await get_audio(self, m, "Right channel")
         if not audio:
             return
@@ -160,8 +150,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def leftscmd(self, m):
-        """.lefts <reply to audio>
-            Push sound to left channel"""
+        """<reply to audio> - Push sound to left channel"""
         audio = await get_audio(self, m, "Left channel")
         if not audio:
             return
@@ -170,8 +159,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def normscmd(self, m):
-        """.norms <reply to audio>
-            Normalize sound (from quiet to normal)"""
+        """<reply to audio> - Normalize sound (from quiet to normal)"""
         audio = await get_audio(self, m, "Normalization")
         if not audio:
             return
@@ -180,8 +168,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def tovscmd(self, m):
-        """.tovs <reply to audio>
-            Convert to voice message"""
+        """<reply to audio> - Convert to voice message"""
         f = utils.get_args_raw(m)
         audio = await get_audio(self, m, "Voice")
         if not audio:
@@ -191,8 +178,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def convscmd(self, m):
-        """.convs <reply to audio> [audio_format (ex. `mp3`)]
-            Convert audio to some format"""
+        """<reply to audio> [audio_format (ex. `mp3`)] - Convert audio to some format"""
         f = utils.get_args(m)
         if not f:
             return await utils.answer(m, self.strings("set_fmt", m).format('Converter'))
@@ -203,8 +189,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def byrobertscmd(self, m):
-        '''.byroberts <reply to audio>
-            Add at the end "Directed by Robert B Weide"'''
+        '''<reply to audio> - Add at the end "Directed by Robert B Weide"'''
         audio = await get_audio(self, m, "Directed by...")
         if not audio:
             return
@@ -215,8 +200,7 @@ class AudioEditorMod(loader.Module):
 
     @loader.owner
     async def cutscmd(self, m):
-        """.cuts <start(ms):end(ms)> <reply to audio>
-        Cut audio"""
+        """<start(ms):end(ms)> <reply to audio> - Cut audio"""
         args = utils.get_args_raw(m)
         if not args:
             return await utils.answer(m, self.strings("set_time", m).format('Cut'))
