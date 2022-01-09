@@ -30,22 +30,21 @@ class JacquesMod(loader.Module):
 		
 		ufr = requests.get("https://github.com/Conradk10/ftg-modules-repo/blob/master/content/fonts/HelveticaNeueCyr-Bold.ttf?raw=true")
 		f = ufr.content
-		
+
 		reply = await message.get_reply_message()
 		args = utils.get_args_raw(message)
-		if not args:
-			if not reply:
-				await utils.answer(message, self.strings('usage', message))
-				return
-			else:
-				txt = reply.raw_text
-		else:
+		if args:
 			txt = utils.get_args_raw(message)
+		elif not reply:
+			await utils.answer(message, self.strings('usage', message))
+			return
+		else:
+			txt = reply.raw_text
 		await utils.answer(message, "<b>делОю...</b>")
 		pic = requests.get("https://0x0.st/-aTY.jpg")
 		pic.raw.decode_content = True
 		img = Image.open(io.BytesIO(pic.content)).convert("RGB")
- 
+
 		W, H = img.size
 		#txt = txt.replace("\n", "𓃐")
 		text = "\n".join(wrap(txt, 19))

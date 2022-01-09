@@ -36,70 +36,70 @@ class AntiLogspamMod(loader.Module):
     }
 
     async def check_user(self, cid, user, event_type, event=None):
-        if user != self.me:
-            if cid in self.chats:
-                changes = False
-                if user not in self.chats[cid]:
-                    self.chats[cid][user] = []
-                    changes = True
-
-                self.chats[cid][user].append(round(time.time()))
-
-                for u, timings in self.chats[cid].items():
-                    if u == 'settings': continue
-                    loc_timings = timings.copy()
-                    for timing in loc_timings:
-                        if timing + self.chats[cid]['settings']['detection_interval'] <= time.time():
-                            self.chats[cid][u].remove(timing)
-                            changes = True
-
-                if len(self.chats[cid][user]) >= self.chats[cid]['settings']['detection_range']:
-                    action = self.chats[cid]['settings']['action']
-                    if event_type != 'deleted':
-                        try:
-                            await event.message.delete()
-                        except:
-                            logger.exception(f'[AntiLogspam]: Error deleting logspam message')
-
-                    if int(self.chats[cid]['settings']['cooldown']) <= time.time():
-                        try:
-                            user_name = (await self.client.get_entity(int(user))).first_name
-                        except:
-                            user_name = "Brother"
-
-                        self.warn = ('warn' in self.allmodules.commands)
-
-                        if action == "delmsg" and event_type != 'deleted':
-                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'deleted message'))
-                        elif action == "kick":
-                            await self.client.kick_participant(int(cid), int(user))
-                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'kicked him'))
-                        elif action == "ban":
-                            await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, view_messages=True, send_messages=True, send_media=True, send_stickers=True, send_gifs=True, send_games=True, send_inline=True, embed_links=True)))
-                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'banned him for 15 mins'))
-                        elif action == "mute":
-                            await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, send_messages=True)))
-                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'muted him for 15 mins'))
-                        elif action == "warn":
-                            if not self.warn:
-                                await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'should have warned him, but Warns is not installed'))
-                            else:
-                                warn_msg = await self.client.send_message(int(cid), f'.warn {user} logspam')
-                                await self.allmodules.commands['warn'](warn_msg)
-                                await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'warned him'))
-                        else:
-                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'just chill 😶‍🌫️ '))
-
-
-                        self.chats[cid]['settings']['cooldown'] = round(time.time()) + 15
-
-                    self.chats[cid][user] = []
-                    changes = True
-
-                if changes:
-                    open('innoconfig/AntiLogspam.json', 'w').write(json.dumps(self.chats))
-        else:
+        if user == self.me:
             logger.debug('[AntiLogspam]: Message from owner, ignoring...')
+
+        elif cid in self.chats:
+            changes = False
+            if user not in self.chats[cid]:
+                self.chats[cid][user] = []
+                changes = True
+
+            self.chats[cid][user].append(round(time.time()))
+
+            for u, timings in self.chats[cid].items():
+                if u == 'settings': continue
+                loc_timings = timings.copy()
+                for timing in loc_timings:
+                    if timing + self.chats[cid]['settings']['detection_interval'] <= time.time():
+                        self.chats[cid][u].remove(timing)
+                        changes = True
+
+            if len(self.chats[cid][user]) >= self.chats[cid]['settings']['detection_range']:
+                action = self.chats[cid]['settings']['action']
+                if event_type != 'deleted':
+                    try:
+                        await event.message.delete()
+                    except:
+                        logger.exception('[AntiLogspam]: Error deleting logspam message')
+
+                if int(self.chats[cid]['settings']['cooldown']) <= time.time():
+                    try:
+                        user_name = (await self.client.get_entity(int(user))).first_name
+                    except:
+                        user_name = "Brother"
+
+                    self.warn = ('warn' in self.allmodules.commands)
+
+                    if action == "delmsg" and event_type != 'deleted':
+                        await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'deleted message'))
+                    elif action == "kick":
+                        await self.client.kick_participant(int(cid), int(user))
+                        await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'kicked him'))
+                    elif action == "ban":
+                        await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, view_messages=True, send_messages=True, send_media=True, send_stickers=True, send_gifs=True, send_games=True, send_inline=True, embed_links=True)))
+                        await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'banned him for 15 mins'))
+                    elif action == "mute":
+                        await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, send_messages=True)))
+                        await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'muted him for 15 mins'))
+                    elif action == "warn":
+                        if not self.warn:
+                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'should have warned him, but Warns is not installed'))
+                        else:
+                            warn_msg = await self.client.send_message(int(cid), f'.warn {user} logspam')
+                            await self.allmodules.commands['warn'](warn_msg)
+                            await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'warned him'))
+                    else:
+                        await self.client.send_message(int(cid), self.strings('dont_spam').format(user, user_name, 'just chill 😶‍🌫️ '))
+
+
+                    self.chats[cid]['settings']['cooldown'] = round(time.time()) + 15
+
+                self.chats[cid][user] = []
+                changes = True
+
+            if changes:
+                open('innoconfig/AntiLogspam.json', 'w').write(json.dumps(self.chats))
 
     async def client_ready(self, client, db):
         self.db = db
@@ -136,19 +136,19 @@ class AntiLogspamMod(loader.Module):
                     return
 
                 if cid + '_' + str(msid) not in self.cache:
-                    logger.debug(f'[AntiLogspam]: Message not found, ignoring')
+                    logger.debug('[AntiLogspam]: Message not found, ignoring')
                     return
 
                 try:
                     user = str(self.cache[cid + '_' + str(msid)][0])
                 except:
-                    logger.exception(f'[AntiLogspam]: Unknown exception')
+                    logger.exception('[AntiLogspam]: Unknown exception')
                     return
 
                 logger.debug(f'[AntiLogspam]: Found msg in cache from user {user}')
 
                 if cid not in self.chats:
-                    logger.debug(f'[AntiLogspam]: Event from blacklisted channel')
+                    logger.debug('[AntiLogspam]: Event from blacklisted channel')
                     return
 
 

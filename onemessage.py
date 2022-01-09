@@ -25,9 +25,10 @@ class OneMessageMod(loader.Module):
 	async def watcher(self, message):
 		if not isinstance(message, Message):
 			return
-		if message.message:
-			if message.raw_text[0] in self._db.get("friendly-telegram.modules.corectrl", "command_prefix", ".") or message.fwd_from:
-				return
+		if message.message and (message.raw_text[0] in self._db.get(
+		    "friendly-telegram.modules.corectrl", "command_prefix", ".")
+		                        or message.fwd_from):
+			return
 		if self._db.get("OneMessage", "status", None) and message.sender_id == self._db.get("OneMessage", "my_id", None) and not message.media:
 			last_msg = (await self.client.get_messages(message.to_id, limit=2))[-1]
 			if last_msg.sender_id == message.sender_id and not last_msg.fwd_from:

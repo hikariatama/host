@@ -93,4 +93,3 @@ class AntiHelpMod(loader.Module):
                             await self.client.delete_messages(int(cid), [msg])
         except:
             logger.exception('debugging')
-            pass

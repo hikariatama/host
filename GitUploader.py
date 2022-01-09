@@ -92,15 +92,13 @@ class GitaddMod(loader.Module):
                 uploaded_to = f'https://github.com/{USERNAME}/{REPO}'
                 uploaded_to_raw = uploaded_to + f'/raw/master/{fname}'
                 await utils.answer(message, f"Файл <code>{fname}</code> успешно загружен на <a href=\f'{uploaded_to}\'>репозиторий!</a>\n\nПрямая ссылка: <code>{uploaded_to_raw}</code>")
-                return
             elif int(r.status_code) == 422:
                 await utils.answer(message, self.strings("exist_422", message))
-                return
             else:
                 json_resp = json.loads(r.text)
                 git_resp = json_resp["message"]
                 await utils.answer(message, f"Произошла неизвестная ошибка! Ответ сервера:\n <code>{git_resp}</code>")
-                return
+            return
         except ConnectionError:
             await utils.answer(message, self.strings("connection_error", message))
             return

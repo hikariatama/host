@@ -55,10 +55,10 @@ async def check(m, string, version, arg='u', save=False):
 			except Exception as e: return await m.edit(f"]EYE_API[ <b>Err:</b> {e}")
 	elif reply:
 		try:
-			if arg == 'u':
-				user = str(reply.sender.id)
-			elif arg == 'p':
+			if arg == 'p':
 				user = reply.contact.phone_number[1:]
+			elif arg == 'u':
+				user = str(reply.sender.id)
 		except Exception as e:
 			return await m.edit(f"]EYE_API[ <b>Err:</b> {e}")
 	else:
@@ -70,6 +70,6 @@ async def check(m, string, version, arg='u', save=False):
 	)
 	if save:
 		await m.client.send_message("me", f"[EYE_API] Ответ API: <code>{resp}</code>")
-		await m.edit(f"[EYE_API] Ответ API отправлен в избранное!")
+		await m.edit('[EYE_API] Ответ API отправлен в избранное!')
 	else:
 		await m.edit(f"[EYE_API] Ответ API: <code>{resp}</code>")
