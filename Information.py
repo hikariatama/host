@@ -12,7 +12,9 @@ from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.types import MessageActionChannelMigrateFrom, ChannelParticipantsAdmins, UserStatusOnline
 
 from .. import loader, utils
+import logging
 
+logger = logging.getLogger(__name__)
 
 @loader.tds
 class WhoIsMod(loader.Module):
@@ -69,7 +71,9 @@ class WhoIsMod(loader.Module):
 
 async def get_user_info(user, message):
 	"""Detailed information about the user."""
-	uuser = user.user
+	uuser = user.users[0]
+	user = user.full_user
+	logger.info(str(user))
 
 	user_photos = await message.client(GetUserPhotosRequest(user_id=uuser.id,
 	                                                        offset=42, max_id=0, limit=100))

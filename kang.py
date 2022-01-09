@@ -27,6 +27,7 @@ from telethon.tl.types import InputStickerSetShortName
 from telethon.tl.functions.messages import GetStickerSetRequest
 from telethon.errors import StickersetInvalidError
 import math
+import random
 
 #requires: Pillow
 
@@ -167,7 +168,7 @@ class KangMod(loader.Module):
                 response = await self.client(GetStickerSetRequest(
                     stickerset=InputStickerSetShortName(
                         short_name = packname
-                    )
+                    ), hash=random.randint(-2147483647, 2147483647)
                 ))
             except StickersetInvalidError:
                 response = None
