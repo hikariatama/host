@@ -229,7 +229,7 @@ class VoiceMod(loader.Module):
     async def vdebugcmd(self, m: types.Message):
         """.vdebug
         debug"""
-        await utils.answer(m, f'DEBUG : {str(self.group_calls)}')
+        await utils.answer(m, f'DEBUG : {self.group_calls}')
 
     @loader.unrestricted
     async def smcmd(self, message):

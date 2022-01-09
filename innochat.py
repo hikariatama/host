@@ -174,7 +174,7 @@ This script is made by @innomods"""
         try:
             if reply:
                 user = await self.client.get_entity(reply.from_id)
-                reason = args if args else self.strings('no_reason')
+                reason = args or self.strings('no_reason')
             else:
                 user = await self.client.get_entity(args.split(maxsplit=1)[0])
                 reason = args.split(maxsplit=1)[1] if len(
@@ -210,7 +210,7 @@ This script is made by @innomods"""
                         args.split()) > 1 else self.strings('no_reason')
                 except:
                     t = 0
-                    reason = args if args else self.strings('no_reason')
+                    reason = args or self.strings('no_reason')
 
             else:
                 user = await self.client.get_entity(args.split(maxsplit=1)[0])
@@ -250,7 +250,7 @@ This script is made by @innomods"""
                         args.split()) > 1 else self.strings('no_reason')
                 except:
                     t = 0
-                    reason = args if args else self.strings('no_reason')
+                    reason = args or self.strings('no_reason')
 
             else:
                 user = await self.client.get_entity(args.split(maxsplit=1)[0])
@@ -287,7 +287,7 @@ This script is made by @innomods"""
         try:
             if reply:
                 user = await self.client.get_entity(reply.from_id)
-                prefix = args if args else self.strings('no_reason')
+                prefix = args or self.strings('no_reason')
             else:
                 user = await self.client.get_entity(args.split(maxsplit=1)[0])
                 prefix = args.split(maxsplit=1)[1] if len(
@@ -632,52 +632,51 @@ This script is made by @innomods"""
     async def check_user(self, cid, user, event_type, event=None):
         
 
-        if user != self.me:
-            if cid in self.chats:
-                if 'als' in self.chats[cid]:
-                    changes = False
-                    if user not in self.chats[cid]['als']:
-                        self.chats[cid]['als'][user] = []
-                        changes = True
-
-                    self.chats[cid]['als'][user].append(round(time.time()))
-
-                    for u, timings in self.chats[cid]['als'].items():
-                        if u == 'settings':
-                            continue
-                        loc_timings = timings.copy()
-                        for timing in loc_timings:
-                            if timing + self.chats[cid]['als']['settings']['detection_interval'] <= time.time():
-                                self.chats[cid]['als'][u].remove(timing)
-                                changes = True
-
-                    if len(self.chats[cid]['als'][user]) >= self.chats[cid]['als']['settings']['detection_range']:
-                        action = self.chats[cid]['als']['settings']['action']
-                        if event_type != 'deleted':
-                            try:
-                                await event.message.delete()
-                            except:
-                                pass
-                                # logger.exception(f'[AntiLogspam]: Error deleting logspam message')
-
-                        if int(self.chats[cid]['als']['settings']['cooldown']) <= time.time():
-                            try:
-                                user_name = (await self.client.get_entity(int(user))).first_name
-                            except:
-                                user_name = "Brother"
-
-                            await self.punish(int(cid), int(user), 'logspam', self.chats[cid]['als']['settings']['action'], user_name)
-
-                            self.chats[cid]['als']['settings']['cooldown'] = round(
-                                time.time()) + 15
-
-                        del self.chats[cid]['als'][user]
-                        changes = True
-
-                    if changes:
-                        self.db.set('InnoChats', 'chats', self.chats)
-        else:
+        if user == self.me:
             logger.debug('[AntiLogspam]: Message from owner, ignoring...')
+
+        elif cid in self.chats and 'als' in self.chats[cid]:
+            changes = False
+            if user not in self.chats[cid]['als']:
+                self.chats[cid]['als'][user] = []
+                changes = True
+
+            self.chats[cid]['als'][user].append(round(time.time()))
+
+            for u, timings in self.chats[cid]['als'].items():
+                if u == 'settings':
+                    continue
+                loc_timings = timings.copy()
+                for timing in loc_timings:
+                    if timing + self.chats[cid]['als']['settings']['detection_interval'] <= time.time():
+                        self.chats[cid]['als'][u].remove(timing)
+                        changes = True
+
+            if len(self.chats[cid]['als'][user]) >= self.chats[cid]['als']['settings']['detection_range']:
+                action = self.chats[cid]['als']['settings']['action']
+                if event_type != 'deleted':
+                    try:
+                        await event.message.delete()
+                    except:
+                        pass
+                        # logger.exception(f'[AntiLogspam]: Error deleting logspam message')
+
+                if int(self.chats[cid]['als']['settings']['cooldown']) <= time.time():
+                    try:
+                        user_name = (await self.client.get_entity(int(user))).first_name
+                    except:
+                        user_name = "Brother"
+
+                    await self.punish(int(cid), int(user), 'logspam', self.chats[cid]['als']['settings']['action'], user_name)
+
+                    self.chats[cid]['als']['settings']['cooldown'] = round(
+                        time.time()) + 15
+
+                del self.chats[cid]['als'][user]
+                changes = True
+
+            if changes:
+                self.db.set('InnoChats', 'chats', self.chats)
 
     async def protectscmd(self, message):
         """List available filters"""
@@ -701,8 +700,7 @@ This script is made by @innomods"""
                 changes = True
                 continue
 
-            line = ""
-            line += "🐼" if 'als' in obj else ""
+            line = "" + ("🐼" if 'als' in obj else "")
             line += "🐺" if 'antihelp' in obj else ""
             line += "🐻" if 'arabshield' in obj else ""
             line += "🐵" if 'antitagall' in obj else ""
@@ -736,8 +734,10 @@ This script is made by @innomods"""
 
         obj = self.chats[cid]
 
-        line = ""
-        line += "\n🐺 <b>AntiHelp.</b>" if 'antihelp' in obj else ""
+
+
+        line = "" + ("\n🐺 <b>AntiHelp.</b>" if 'antihelp' in obj else "")
+
         line += "\n🐵 <b>AntiTagAll.</b> Action: <b>{}</b>".format(
             obj['antitagall']) if 'antitagall' in obj else ""
         line += "\n🐻 <b>AntiArab.</b> Action: <b>{}</b>".format(
@@ -770,7 +770,16 @@ This script is made by @innomods"""
             await self.client(telethon.tl.functions.channels.EditBannedRequest(cid, user, telethon.tl.types.ChatBannedRights(until_date=time.time() + 60 * 60, view_messages=True, send_messages=True, send_media=True, send_stickers=True, send_gifs=True, send_games=True, send_inline=True, embed_links=True)))
         elif action == "mute":
             await self.client.send_message(cid, self.strings(violation).format(user, user_name, 'muted him for 1 hour'))
-            await self.client(telethon.tl.functions.channels.EditBannedRequest(cid, user, telethon.tl.types.ChatBannedRights(until_date=time.time() + 60 * 60, send_messages=True)))
+            await self.client(
+                telethon.tl.functions.channels.EditBannedRequest(
+                    cid,
+                    user,
+                    telethon.tl.types.ChatBannedRights(
+                        until_date=time.time() + 60 ** 2, send_messages=True
+                    ),
+                )
+            )
+
         elif action == "warn":
             if not self.warn:
                 await self.client.send_message(cid, self.strings(violation).format(user, user_name, 'should have warned him, but Warns is not installed'))
@@ -798,10 +807,7 @@ This script is made by @innomods"""
         user = None
         if reply:
             user = await self.client.get_entity(reply.from_id)
-            if args:
-                reason = args
-            else:
-                reason = self.strings('no_reason')
+            reason = args or self.strings('no_reason')
         else:
             try:
                 u = args.split(maxsplit=1)[0]
@@ -1106,15 +1112,18 @@ This script is made by @innomods"""
             user = message.from_id if getattr(
                 message, 'from_id', None) is not None else None
 
-            if 'als' in self.chats[cid]:
-                if user is not None and str(user) != self.me:
-                    msid = message.id
-                    self.cache[cid + "_" + str(msid)] = (user,
-                                                         round(time.time()) - self.correction)
-                    for key, info in self.cache.copy().items():
-                        if time.time() - info[1] - self.correction >= 86400:
-                            del self.cache[key]
-                    self.save_cache()
+            if (
+                'als' in self.chats[cid]
+                and user is not None
+                and str(user) != self.me
+            ):
+                msid = message.id
+                self.cache[cid + "_" + str(msid)] = (user,
+                                                     round(time.time()) - self.correction)
+                for key, info in self.cache.copy().items():
+                    if time.time() - info[1] - self.correction >= 86400:
+                        del self.cache[key]
+                self.save_cache()
 
             violation = None
 
@@ -1124,14 +1133,16 @@ This script is made by @innomods"""
 
             # AntiTagAll:
 
-            if 'antitagall' in self.chats[cid]:
-                if getattr(message, 'entities', None) is not None:
-                    mentions = [_ for _ in message.entities if type(_) is telethon.tl.types.MessageEntityMention or type(
-                        _) is telethon.tl.types.MessageEntityMentionName]
+            if (
+                'antitagall' in self.chats[cid]
+                and getattr(message, 'entities', None) is not None
+            ):
+                mentions = [_ for _ in message.entities if type(_) is telethon.tl.types.MessageEntityMention or type(
+                    _) is telethon.tl.types.MessageEntityMentionName]
 
-                    if len(mentions) >= 5:
-                        violation = 'tagall'
-                        action = self.chats[cid]['antitagall']
+                if len(mentions) >= 5:
+                    violation = 'tagall'
+                    action = self.chats[cid]['antitagall']
 
             # AntiHelp:
             if 'antihelp' in self.chats[cid]:

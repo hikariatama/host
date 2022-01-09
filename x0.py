@@ -29,7 +29,7 @@ class x0Mod(loader.Module):
 			file.name = "txt.txt"
 		else:
 			file = io.BytesIO(await self.client.download_file(media))
-			file.name = reply.file.name if reply.file.name else  reply.file.id+reply.file.ext
+			file.name = reply.file.name or reply.file.id+reply.file.ext
 		try:
 			x0at = post('https://x0.at', files={'file': file})
 		except ConnectionError as e:

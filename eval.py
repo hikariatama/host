@@ -45,7 +45,7 @@ class eval(commands.Cog):
             '''Simple generator that paginates text.'''
             last = 0
             pages = []
-            for curr in range(0, len(text)):
+            for curr in range(len(text)):
                 if curr % 1980 == 0:
                     pages.append(text[last:curr])
                     last = curr

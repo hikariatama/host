@@ -24,7 +24,7 @@ class base64Mod(loader.Module):
 			else:
 				data = bytes(reply.raw_text, "utf-8")
 		else:
-			await message.edit(f"<b>Что нужно закодировать?</b>")
+			await message.edit('<b>Что нужно закодировать?</b>')
 		output = b64encode(data)
 		if len(output) > 4000:
 			output = io.BytesIO(output)
@@ -49,7 +49,7 @@ class base64Mod(loader.Module):
 			else:
 				data = bytes(reply.raw_text, "utf-8")
 		else:
-			await message.edit(f"<b>Что нужно декодировать?</b>")
+			await message.edit('<b>Что нужно декодировать?</b>')
 			return
 		try:
 			output = b64decode(data)

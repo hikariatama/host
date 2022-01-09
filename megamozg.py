@@ -66,9 +66,8 @@ class MegaMozgMod(loader.Module):
         if m.chat.id not in self.db.get(self._db_name, 'chats', []):
             return
         ch = self.db.get(self._db_name, 'chance', 0)
-        if ch != 0:
-            if random.randint(0, ch) != 0:
-                return
+        if ch != 0 and random.randint(0, ch) != 0:
+            return
         text = m.raw_text
         words = {random.choice(
             list(filter(lambda x: len(x) >= 3, text.split()))) for _ in ".."}

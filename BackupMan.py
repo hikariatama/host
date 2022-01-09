@@ -52,9 +52,7 @@ class BackupManMod(loader.Module):
     async def restncmd(self, m):
         "Установить все заметки из *.bkn файла\n<f> - Заменять уже существующие заметки"
         args: list or None = utils.get_args_raw(m)
-        force = False
-        if "f" in args.lower():
-            force = True
+        force = "f" in args.lower()
         reply = await m.get_reply_message()
         if not reply or not reply.file or reply.file.name.split('.')[-1] != "bkn":
             return await m.edit("<b>[BackupMan]</b> Reply to <code>*.bkn</code> file")

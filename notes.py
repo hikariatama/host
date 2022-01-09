@@ -47,10 +47,7 @@ class NotesMod(loader.Module):
 			return
 		asset_id = self._db.get("friendly-telegram.modules.notes", "notes", {}).get(args[0], None)
 		logger.debug(asset_id)
-		if asset_id is not None:
-			asset = await self._db.fetch_asset(asset_id)
-		else:
-			asset = None
+		asset = await self._db.fetch_asset(asset_id) if asset_id is not None else None
 		if asset is None:
 			self.del_note(args[0])
 			await utils.answer(message, self.strings("no_note", message))
@@ -68,10 +65,7 @@ class NotesMod(loader.Module):
 			return
 		asset_id = self._db.get("friendly-telegram.modules.notes", "notes", {}).get(args[0], None)
 		logger.debug(asset_id)
-		if asset_id is not None:
-			asset = await self._db.fetch_asset(asset_id)
-		else:
-			asset = None
+		asset = await self._db.fetch_asset(asset_id) if asset_id is not None else None
 		if asset is None:
 			self.del_note(args[0])
 			await utils.answer(message, self.strings("no_note", message))
@@ -93,17 +87,16 @@ class NotesMod(loader.Module):
 		if not args:
 			await utils.answer(message, self.strings("what_name", message))
 			return
-		if not message.is_reply:
-			if len(args) < 2:
-				await utils.answer(message, self.strings("save_what", message))
-				return
-			else:
-				message.entities = None
-				message.message = args[1]
-				target = message
-				logger.debug(target.message)
-		else:
+		if message.is_reply:
 			target = await message.get_reply_message()
+		elif len(args) < 2:
+			await utils.answer(message, self.strings("save_what", message))
+			return
+		else:
+			message.entities = None
+			message.message = args[1]
+			target = message
+			logger.debug(target.message)
 		asset_id = await self._db.store_asset(target)
 		self._db.set("friendly-telegram.modules.notes", "notes", {**self._db.get("friendly-telegram.modules.notes", "notes", {}), args[0]: asset_id})
 		await utils.answer(message, str(self.strings("saved", message)).format(args[0]))

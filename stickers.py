@@ -62,7 +62,7 @@ class StickersMod(loader.Module):
                                           lambda m: self.strings("default_sticker_emoji_cfg_doc", m))
         self._lock = asyncio.Lock()
 
-    async def kangcmd(self, message):  # noqa: C901 # TODO: split this into helpers
+    async def kangcmd(self, message):    # noqa: C901 # TODO: split this into helpers
         """Use in reply or with an attached media:
            .kang <pack name> [emojis]
            If pack is not matched the most recently created will be used instead"""
@@ -72,17 +72,16 @@ class StickersMod(loader.Module):
             await utils.answer(message, self.strings("what_pack", message))
             return
 
-        if not message.is_reply:
-            if message.sticker or message.photo:
-                logger.debug("user sent photo/sticker directly not reply")
-                sticker = message
-            else:
-                logger.debug("user didnt send any sticker/photo or reply")
-                async for sticker in message.client.iter_messages(message.to_id, 10):
-                    if sticker.sticker or sticker.photo:
-                        break  # Changes message into the right one
-        else:
+        if message.is_reply:
             sticker = await message.get_reply_message()
+        elif message.sticker or message.photo:
+            logger.debug("user sent photo/sticker directly not reply")
+            sticker = message
+        else:
+            logger.debug("user didnt send any sticker/photo or reply")
+            async for sticker in message.client.iter_messages(message.to_id, 10):
+                if sticker.sticker or sticker.photo:
+                    break  # Changes message into the right one
         if not (sticker.sticker or sticker.photo):
             await utils.answer(message, self.strings("what_photo", message))
             return

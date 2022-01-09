@@ -103,7 +103,6 @@ class KangMod(loader.Module):
                     else:
                         photo = io.BytesIO()
                         await self.client.download_file(reply.media.document, photo)
-
                     # For kanging other sticker
                         if reply.sticker:
                             emoji = reply.file.emoji
@@ -193,7 +192,10 @@ class KangMod(loader.Module):
                         await conv.send_message(packname)
                         x = await conv.get_response()
                         mtext = x.text
-                        if x.text == "Invalid pack selected." or x.text == "Не выбран набор стикеров.":
+                        if x.text in [
+                            "Invalid pack selected.",
+                            "Не выбран набор стикеров.",
+                        ]:
                             await conv.send_message(cmd)
                             await conv.get_response()
                             await self.client.send_read_acknowledge(conv.chat_id)
@@ -292,7 +294,6 @@ class KangMod(loader.Module):
 async def resize_photo(photo):
     """ Изменение размера пака на 512x512 """
     image = Image.open(photo)
-    maxsize = (512, 512)
     if (image.width and image.height) < 512:
         size1 = image.width
         size2 = image.height
@@ -309,6 +310,7 @@ async def resize_photo(photo):
         sizenew = (size1new, size2new)
         image = image.resize(sizenew)
     else:
+        maxsize = (512, 512)
         image.thumbnail(maxsize)
 
     return image
