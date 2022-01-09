@@ -46,9 +46,7 @@ class DownloaderMod(loader.Module):
 		""".ulf <file_name/path> send file from server
 		<d> - Delete file after sending"""
 		name = utils.get_args_raw(message)
-		d = False
-		if 'd ' in name:
-			d = True
+		d = 'd ' in name
 		if not name:
 			return await message.edit('No args')
 		try:
@@ -150,10 +148,9 @@ async def downloading(message, big=False):
 			fname = url.split("/")[-1]
 			text = get(url, stream=big)
 			if big:
-				f = open(fname, "wb")
-				for chunk in text.iter_content(1024):
-					f.write(chunk)
-				f.close()
+				with open(fname, "wb") as f:
+					for chunk in text.iter_content(1024):
+						f.write(chunk)
 				await message.edit("<b>Sending...</b>\n" + url)
 				await message.client.send_file(message.to_id, open(fname, "rb"),
 				                               reply_to=reply)

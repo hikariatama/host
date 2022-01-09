@@ -38,7 +38,7 @@ async def create_overlay(message, reply):
 
     biogr = io.BytesIO(overlays[overlay])
     biogr.seek(0)
-    biogr = AudioSegment.from_file(biogr)[0:len(voice)]-vol
+    biogr = AudioSegment.from_file(biogr)[:len(voice)] - vol
 
     out = biogr.overlay(voice, position=0)
     output = io.BytesIO()

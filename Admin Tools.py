@@ -269,12 +269,10 @@ class AdminToolsMod(loader.Module):
                 return await utils.answer(message, self.strings('no_rights', message))
             if not reason:
                 return await utils.answer(message, self.strings('kicked', message).format(user.first_name))
-            if reason:
-                return await utils.answer(message,
-                                          self.strings('kicked_for_reason', message).format(user.first_name,
-                                                                                            reason))
+            return await utils.answer(message,
+                                      self.strings('kicked_for_reason', message).format(user.first_name,
+                                                                                        reason))
 
-            return await utils.answer(message, self.strings('kicked', message).format(user.first_name))
         except ValueError:
             return await utils.answer(message, self.strings('no_args', message))
 
@@ -316,11 +314,9 @@ class AdminToolsMod(loader.Module):
                 return await utils.answer(message, self.strings('no_rights', message))
             if not reason:
                 return await utils.answer(message, self.strings('banned', message).format(user.first_name))
-            if reason:
-                return await utils.answer(message,
-                                          self.strings('banned_for_reason', message).format(user.first_name,
-                                                                                            reason))
-            return await utils.answer(message, self.strings('banned', message).format(user.first_name))
+            return await utils.answer(message,
+                                      self.strings('banned_for_reason', message).format(user.first_name,
+                                                                                        reason))
         except ValueError:
             return await utils.answer(message, self.strings('no_args', message))
 

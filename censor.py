@@ -299,68 +299,65 @@ class OCR:
 
     @staticmethod
     def filterText(text, charset = 'UTF-8', exc = ()):
-        utf8 = 'UTF-8'
+    	utf8 = 'UTF-8'
 
-        if charset != utf8:
-            text = text.decode(charset).encode(utf8)
-        m = re.findall(r'\b\d*('
-	'\w*[' + OCR.LT_P + '][' + OCR.LT_I + OCR.LT_E + '][' + OCR.LT_Z + '][' + OCR.LT_D + ']\w*' # пизда
-'|(?:[^' + OCR.LT_I + OCR.LT_U + '\s]+|' + OCR.LT_N + OCR.LT_I + ')?(?<!стра)[' + OCR.LT_H + '][' + OCR.LT_U + '][' + OCR.LT_YI + OCR.LT_E + OCR.LT_YA + OCR.LT_YO + OCR.LT_I + OCR.LT_L + OCR.LT_YU + '](?!иг)\w*' # хуй; не пускает "подстрахуй", "хулиган"
-'|\w*[' + OCR.LT_B + '][' + OCR.LT_L + '](?:[' + OCR.LT_YA + ']+[' + OCR.LT_D + OCR.LT_T + ']?'
-'|[' + OCR.LT_I + ']+[' + OCR.LT_D + OCR.LT_T + ']+'
-'|[' + OCR.LT_I + ']+[' + OCR.LT_A + ']+)(?!х)\w*' # бля, блядь; не пускает "бляха"
-'|(?:\w*[' + OCR.LT_YI + OCR.LT_U + OCR.LT_E + OCR.LT_A + OCR.LT_O + OCR.LT_HS + OCR.LT_SS + OCR.LT_Y + OCR.LT_YA + '][' + OCR.LT_E + OCR.LT_YO + OCR.LT_YA + OCR.LT_I + '][' + OCR.LT_B + OCR.LT_P + '](?!ы\b|ол)\w*' # не пускает "еёбы", "наиболее", "наибольшее"...
-'|[' + OCR.LT_E + OCR.LT_YO + '][' + OCR.LT_B + ']\w*'
-'|[' + OCR.LT_I + '][' + OCR.LT_B + '][' + OCR.LT_A + ']\w+'
-'|[' + OCR.LT_YI + '][' + OCR.LT_O + '][' + OCR.LT_B + OCR.LT_P + ']\w*)' # ебать
+    	if charset != utf8:
+    	    text = text.decode(charset).encode(utf8)
+    	    m = re.findall(r'\b\d*('
+    		'\w*[' + OCR.LT_P + '][' + OCR.LT_I + OCR.LT_E + '][' + OCR.LT_Z + '][' + OCR.LT_D + ']\w*' # пизда
+    	'|(?:[^' + OCR.LT_I + OCR.LT_U + '\s]+|' + OCR.LT_N + OCR.LT_I + ')?(?<!стра)[' + OCR.LT_H + '][' + OCR.LT_U + '][' + OCR.LT_YI + OCR.LT_E + OCR.LT_YA + OCR.LT_YO + OCR.LT_I + OCR.LT_L + OCR.LT_YU + '](?!иг)\w*' # хуй; не пускает "подстрахуй", "хулиган"
+    	'|\w*[' + OCR.LT_B + '][' + OCR.LT_L + '](?:[' + OCR.LT_YA + ']+[' + OCR.LT_D + OCR.LT_T + ']?'
+    	'|[' + OCR.LT_I + ']+[' + OCR.LT_D + OCR.LT_T + ']+'
+    	'|[' + OCR.LT_I + ']+[' + OCR.LT_A + ']+)(?!х)\w*' # бля, блядь; не пускает "бляха"
+    	'|(?:\w*[' + OCR.LT_YI + OCR.LT_U + OCR.LT_E + OCR.LT_A + OCR.LT_O + OCR.LT_HS + OCR.LT_SS + OCR.LT_Y + OCR.LT_YA + '][' + OCR.LT_E + OCR.LT_YO + OCR.LT_YA + OCR.LT_I + '][' + OCR.LT_B + OCR.LT_P + '](?!ы\b|ол)\w*' # не пускает "еёбы", "наиболее", "наибольшее"...
+    	'|[' + OCR.LT_E + OCR.LT_YO + '][' + OCR.LT_B + ']\w*'
+    	'|[' + OCR.LT_I + '][' + OCR.LT_B + '][' + OCR.LT_A + ']\w+'
+    	'|[' + OCR.LT_YI + '][' + OCR.LT_O + '][' + OCR.LT_B + OCR.LT_P + ']\w*)' # ебать
 #'|\w*[' + OCR.LT_S + '][' + OCR.LT_C + ']?[' + OCR.LT_U + ']+(?:[' + OCR.LT_CH + ']*[' + OCR.LT_K + ']+'
 #'|[' + OCR.LT_CH + ']+[' + OCR.LT_K + ']*)[' + OCR.LT_A + OCR.LT_O + ']\w*' # сука
-'|\w*(?:[' + OCR.LT_P + '][' + OCR.LT_I + OCR.LT_E + '][' + OCR.LT_D + '][' + OCR.LT_A + OCR.LT_O + OCR.LT_E + ']?[' + OCR.LT_R + '](?!о)\w*' # не пускает "Педро"
-'|[' + OCR.LT_P + '][' + OCR.LT_E + '][' + OCR.LT_D + '][' + OCR.LT_E + OCR.LT_I + ']?[' + OCR.LT_G + OCR.LT_K + '])' # пидарас
-'|\w*[' + OCR.LT_Z + '][' + OCR.LT_A + OCR.LT_O + '][' + OCR.LT_L + '][' + OCR.LT_U + '][' + OCR.LT_P + ']\w*' # залупа
-'|\w*[' + OCR.LT_M + '][' + OCR.LT_A + '][' + OCR.LT_N + '][' + OCR.LT_D + '][' + OCR.LT_A + OCR.LT_O + ']\w*' # манда
-'|\w*[' + OCR.LT_G + '][' + OCR.LT_O + OCR.LT_A + '][' + OCR.LT_N + '][' + OCR.LT_D + '][' + OCR.LT_O + '][' + OCR.LT_N + ']\w*' # гондон
-')', text)
+    	'|\w*(?:[' + OCR.LT_P + '][' + OCR.LT_I + OCR.LT_E + '][' + OCR.LT_D + '][' + OCR.LT_A + OCR.LT_O + OCR.LT_E + ']?[' + OCR.LT_R + '](?!о)\w*' # не пускает "Педро"
+    	'|[' + OCR.LT_P + '][' + OCR.LT_E + '][' + OCR.LT_D + '][' + OCR.LT_E + OCR.LT_I + ']?[' + OCR.LT_G + OCR.LT_K + '])' # пидарас
+    	'|\w*[' + OCR.LT_Z + '][' + OCR.LT_A + OCR.LT_O + '][' + OCR.LT_L + '][' + OCR.LT_U + '][' + OCR.LT_P + ']\w*' # залупа
+    	'|\w*[' + OCR.LT_M + '][' + OCR.LT_A + '][' + OCR.LT_N + '][' + OCR.LT_D + '][' + OCR.LT_A + OCR.LT_O + ']\w*' # манда
+    	'|\w*[' + OCR.LT_G + '][' + OCR.LT_O + OCR.LT_A + '][' + OCR.LT_N + '][' + OCR.LT_D + '][' + OCR.LT_O + '][' + OCR.LT_N + ']\w*' # гондон
+    	')', text)
 
-        c = len(m)
+    	c = len(m)
 
-        #exclusion=array('хлеба','наиболее');
-        #m[1]=array_diff($m[1],$exclusion);
+    	    #exclusion=array('хлеба','наиболее');
+    	    #m[1]=array_diff($m[1],$exclusion);
 
-        if c:
-            i = 0
-            xwords = []
-            while i < c:
-                #if i >= c: break
-                word_orig = m[i]
-                word = word_orig.lower()
+    	if c:
+    		i = 0
+    		xwords = []
+    		while i < c:
+    		    #if i >= c: break
+    		    word_orig = m[i]
+    		    word = word_orig.lower()
 
-                for x in OCR.exceptions+tuple(exc):
-                    if x in word:
-                        word = False
-                        del m[i]
-                        xwords.append(word_orig)
-                        i -= 1
-                        c -= 1
-                        break
+    		    for x in OCR.exceptions+tuple(exc):
+    		        if x in word:
+    		            word = False
+    		            del m[i]
+    		            xwords.append(word_orig)
+    		            i -= 1
+    		            c -= 1
+    		            break
 
-                if word:
-                    m[i] = ''.join([('' if x in (' ', ',', ';', '.', '!', '-', '?', "\t", "\n") else x) for x in list(m[i])])
+    		    if word:
+    		        m[i] = ''.join([('' if x in (' ', ',', ';', '.', '!', '-', '?', "\t", "\n") else x) for x in list(m[i])])
 
-                i += 1
+    		    i += 1
 
-            m = set(m)
+    		m = set(m)
 
-            asterisks = []
-            for word in m:
-                asterisks.append('*'*len(word))
+    		asterisks = ['*'*len(word) for word in m]
+    		_xwords = " ".join(xwords)
+    		for x, y in zip(m, asterisks):
+    		    text = text.replace(x, y)
+    		    _xwords = _xwords.replace(x, y)
 
-            _xwords = " ".join(xwords) 
-            for x, y in zip(m, asterisks):
-                text = text.replace(x, y)
-                _xwords = _xwords.replace(x, y)
+    		for x, y in zip(_xwords.split(), xwords):
+    		    text = text.replace(x, y)
 
-            for x, y in zip(_xwords.split(), xwords):
-                text = text.replace(x, y)
-
-        return text
+    	return text

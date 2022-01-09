@@ -320,7 +320,9 @@ class ChatMod(loader.Module):
                 continue
             if num and i.phone or not num:
                 f.write(
-                    f"{str(i.first_name)};{str(i.last_name)};{str(i.username)};{str(i.id)};{str(i.phone)}\n".encode())
+                    f'{i.first_name};{i.last_name};{i.username};{i.id};{i.phone}\n'.encode()
+                )
+
         f.seek(0)
         if tome:
             await message.client.send_file('me', f,
@@ -363,7 +365,7 @@ class ChatMod(loader.Module):
                 except errors.FloodWaitError as e:
                     print('Flood for', e.seconds)
         else:
-            await event.edit(f"<b>Куда приглашать будем?</b>")
+            await event.edit('<b>Куда приглашать будем?</b>')
 
     async def reportcmd(self, message):
         """Репорт пользователя за спам."""

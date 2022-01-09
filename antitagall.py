@@ -130,4 +130,3 @@ class AntiTagAllMod(loader.Module):
                 await self.client.send_message(int(cid), self.strings('tagall_detected').format(user, user_name, 'just chill 😶‍🌫️ '))
         except:
             logger.exception('error')
-            pass

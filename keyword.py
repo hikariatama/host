@@ -66,12 +66,11 @@ class KeywordMod(loader.Module):
 
         ph = args
         if not ph:
-            if kw in self.keywords:
-                del self.keywords[kw]
-                self.db.set('Keyword', 'keywords', self.keywords)
-                return await utils.answer(message, self.strings('kw_removed').format(kw))
-            else:
+            if kw not in self.keywords:
                 return await utils.answer(message, self.strings('kw_404').format(kw))
+            del self.keywords[kw]
+            self.db.set('Keyword', 'keywords', self.keywords)
+            return await utils.answer(message, self.strings('kw_removed').format(kw))
         else:
             ph = ph.strip()
             kw = kw.strip()
@@ -117,7 +116,7 @@ class KeywordMod(loader.Module):
                         trigger = True
                         if not ph[1]:
                             break
-                    elif k not in message.text and ph[1]:
+                    elif ph[1]:
                         trigger = False
                         break
 

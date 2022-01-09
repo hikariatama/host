@@ -28,14 +28,13 @@ class DttsMod(loader.Module):
             if not reply:
                 return await utils.answer(message, self.strings['no_text'])
             text = reply.raw_text  # use text from reply
-            if not text:
-                return await utils.answer(message, self.strings['no_text'])
+        if not text:
+            return await utils.answer(message, self.strings['no_text'])
         if message.out:
             await message.delete()  # Delete message only one is user's
         data = {"text": text}
         if speaker:
-            data.update({"speaker": speaker})
-
+            data["speaker"] = speaker
         # creating file in memory
         f = io.BytesIO(requests.get("https://station.aimylogic.com/generate", data=data).content)
         f.name = file

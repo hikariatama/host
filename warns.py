@@ -59,10 +59,7 @@ class InnoWarnsMod(loader.Module):
         user = None
         if reply:
             user = await self.client.get_entity(reply.from_id)
-            if args:
-                reason = args
-            else:
-                reason = self.strings('no_reason')
+            reason = args or self.strings('no_reason')
         else:
             try:
                 u = args.split(maxsplit=1)[0]
@@ -104,7 +101,7 @@ class InnoWarnsMod(loader.Module):
             elif action == "mute":
                 await self.client(telethon.tl.functions.channels.EditBannedRequest(int(cid), int(user), telethon.tl.types.ChatBannedRights(until_date=time.time() + 15 * 60, send_messages=True)))
                 await self.client.send_message(int(cid), self.strings('warns_limit').format(user, user_name, 'muted him for 15 mins'))
-            
+
             await message.delete()
             self.chats[cid]['w'][user] = []
         else:

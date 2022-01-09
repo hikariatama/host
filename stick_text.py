@@ -25,9 +25,7 @@ class Text2stickMod(loader.Module):
 		text = utils.get_args_raw(message)
 		reply = await message.get_reply_message()
 		if not text:
-			if not reply:
-				text = "#ffffff .stext <text or reply>"
-			elif not reply.message:
+			if not reply or not reply.message:
 				text = "#ffffff .stext <text or reply>"
 			else:
 				text = reply.raw_text
@@ -38,20 +36,16 @@ class Text2stickMod(loader.Module):
 					break
 			if len(text.split(" ", 1)) > 1:
 				text = text.split(" ", 1)[1]
-			else:
-				if reply:
-					if reply.message:
-						text = reply.raw_text
+			elif reply and reply.message:
+				text = reply.raw_text
 		else:
 			color = "#FFFFFF"
-		txt = []
-		for line in text.split("\n"):
-			txt.append("\n".join(wrap(line, 30)))
+		txt = ["\n".join(wrap(line, 30)) for line in text.split("\n")]
 		text = "\n".join(txt)
 		font = io.BytesIO(bytes_font)
 		font = ImageFont.truetype(font, 100)
-		image = Image.new("RGBA", (1, 1), (0,0,0,0)) 
-		draw = ImageDraw.Draw(image) 
+		image = Image.new("RGBA", (1, 1), (0,0,0,0))
+		draw = ImageDraw.Draw(image)
 		w, h = draw.multiline_textsize(text=text, font=font)
 		image = Image.new("RGBA", (w+100, h+100), (0,0,0,0))
 		draw = ImageDraw.Draw(image)
