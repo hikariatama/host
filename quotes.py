@@ -22,10 +22,16 @@ from .. import loader, utils
 
 
 def get_message_media(message: Message):
-    data = None
-    if message and message.media:
-        data = message.photo or message.sticker or message.video or message.video_note or message.gif or message.web_preview
-    return data
+    return (
+        message.photo
+        or message.sticker
+        or message.video
+        or message.video_note
+        or message.gif
+        or message.web_preview
+        if message and message.media
+        else None
+    )
 
 
 def get_entities(entities: types.TypeMessageEntity):
