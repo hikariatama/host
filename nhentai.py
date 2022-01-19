@@ -26,10 +26,7 @@ class NHentaiMod(loader.Module):
         link = Hentai.url
         total_pages = Hentai.num_pages
         total_favorites = Hentai.num_favorites
-        tags = ""
-        for tag in Hentai.tag:
-            tags += f"{tag.name} "
-
+        tags = "".join(f"{tag.name} " for tag in Hentai.tag)
         text = f"<a href={link}>{eng_name}</a> [{id_nh}]\n\n"
         text += f"{tags} \n"
         text += f"❤️ {total_favorites} | 📄 {total_pages}"
@@ -37,8 +34,7 @@ class NHentaiMod(loader.Module):
 
     def ListHentaiBuilder(self, Hentais):
         text = ""
-        i = 1
-        for Hentai in Hentais:
+        for i, Hentai in enumerate(Hentais, start=1):
             id_nh = Hentai.id
             eng_name = Hentai.title()
             link = Hentai.url
@@ -47,7 +43,6 @@ class NHentaiMod(loader.Module):
 
             text += f"{i}: <a href={link}>{eng_name}</a> [{id_nh}] / "
             text += f"❤️ {total_favorites} | 📄 {total_pages} \n"
-            i += 1
         return text
 
     @loader.unrestricted

@@ -22,8 +22,7 @@ class MafiaDrawingMod(loader.Module):
         try:
             status = self.db.get("MafiaDrawing", "status")
             me = (await message.client.get_me()).id
-            if status:
-                if message.chat_id == -1001169391811:
-                    click = (await message.click(0)).message
-                    await message.client.send_message(me, f"Словлен подарок:\n\n{click}")
+            if status and message.chat_id == -1001169391811:
+                click = (await message.click(0)).message
+                await message.client.send_message(me, f"Словлен подарок:\n\n{click}")
         except: pass

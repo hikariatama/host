@@ -117,10 +117,7 @@ class mQuotesMod(loader.Module):
         if not messages:
             return await msg.edit("No messages to quote")
 
-        files = []
-        for f in messagePacker.files.values():
-            files.append(("files", f))
-
+        files = [("files", f) for f in messagePacker.files.values()]
         if not files:
             files.append(("files", bytearray()))
 
@@ -201,7 +198,7 @@ class mQuotesMod(loader.Module):
 
 class MessagePacker:
     def __init__(self, client):
-        self.files = dict()
+        self.files = {}
         self.messages = []
         self.client = client
 
@@ -211,7 +208,7 @@ class MessagePacker:
             self.messages.append(packed)
 
     async def packMessage(self, msg):
-        obj = dict()
+        obj = {}
 
         text = msg.message
         if text:
@@ -311,7 +308,7 @@ class MessagePacker:
         return self.files[mid][0]
 
     async def encodeAuthor(self, msg):
-        obj = dict()
+        obj = {}
 
         uid, name, picture, adminTitle = await self.getAuthor(msg)
 
@@ -388,7 +385,7 @@ class MessagePacker:
         return uid, name, picture, adminTitle
 
     async def encodeReply(self, reply):
-        obj = dict()
+        obj = {}
 
         text = reply.message
         if text:
@@ -397,11 +394,7 @@ class MessagePacker:
             media = reply.media
             if media:
                 t = type(media)
-                if t is MessageMediaPhoto:
-                    obj.text = "📷 Photo"
-                else:
-                    obj.text = "💾 File"
-
+                obj.text = "📷 Photo" if t is MessageMediaPhoto else "💾 File"
         name = (await self.getAuthor(reply, full=false))[1]
 
         obj.author = name
@@ -418,8 +411,7 @@ class MessagePacker:
 
 
 async def update(modules, message, url=MODULE_PATH):
-    loader = next(filter(lambda x: "LoaderMod" ==
-                  x.__class__.__name__, modules))
+    loader = next(filter(lambda x: x.__class__.__name__ == "LoaderMod", modules))
     try:
         if await loader.download_and_install(url, message):
             loader._db.set(__name__, "loaded_modules",

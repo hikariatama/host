@@ -46,9 +46,10 @@ class VSHAKALMod(loader.Module):
         )
 
         out = (
-            "".join(random.choice(string.ascii_letters) for i in range(25))
+            "".join(random.choice(string.ascii_letters) for _ in range(25))
             + ".mp4"
         )
+
 
         await m.edit("[Шакал] Шакалю...")
         os.system(
