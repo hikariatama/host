@@ -50,7 +50,7 @@ class KangMod(loader.Module):
         "gettingType_msg": "<code>Получение типа стикера...</code>",
         "image_kanging_msg": "<code>Наклейка с изображением...</code>",
         "animated_kanging_msg": "<code>Обработка...</code>",
-        "pack_notExist": "Стикер пак doesn\'t exist, создаю новый...",
+        "pack_notExist": "Стикер пак не существует, создаю новый...",
         "switching_msg": "<code>Переключение на пак {} из-за недостатка места...</code>",
         "added_to_different_msg": "Стикер добавлен в другой пак!" +
             "Этот пак недавно создан! Ваш пак может быть найден <a href=\"{}\">here</a> \n " +  # noqa: E131

@@ -1,9 +1,10 @@
-# API/Module authors: @Fl1yd, @spypm
-# Thank for.... - no1!!, no1 helped us, we did everything ourselves
-# But we took one method of get messages from the Mishase's and Droox's modules
+"""
+    Copyright 2021 t.me/Fl1yd, t.me/spypm
+    Licensed under the Apache License, Version 2.0
 
-# ладно
-
+    Authors are not responsible for any consequences caused by using this
+    software or any of its parts.
+"""
 
 import io
 import json
@@ -18,7 +19,6 @@ from typing import List, Union
 from time import gmtime
 
 from .. import loader, utils
-
 
 
 def get_message_media(message: Message):
@@ -86,7 +86,6 @@ def strftime(time: Union[int, float]):
             else ""
         ) + f"{t.tm_min:02d}:{t.tm_sec:02d}"
     )
-        
 
 
 @loader.tds
@@ -96,43 +95,29 @@ class ShitQuotesMod(loader.Module):
     """
 
     strings = {
-        "name": "Квотесы",
-        "no_reply": "<b>[Квотесы]</b> Нет реплая",
-        "api_error": "<b>[Квотесы]</b> Ошибка API",
-        "no_args_or_reply": "<b>[Квотесы]</b> Нет аргументов или реплая",
-        "args_error": "<b>[Квотесы]</b> При обработке аргументов произошла ошибка. Запрос был: <code>{}</code>",
+        "name": "SQuotes",
+        "no_reply": "<b>[SQuotes]</b> No reply",
+        "api_error": "<b>[SQuotes]</b> API error",
+        "no_args_or_reply": "<b>[SQuotes]</b> No args or reply",
+        "args_error": "<b>[SQuotes]</b> An error ocurred while parsing args. Request was: <code>{}</code>",
     }
 
-    async def client_ready(self, client: telethon.TelegramClient, db: dict):
+    async def client_ready(self, client: telethon.TelegramClient, db: dict) -> None:
         self.client = client
         self.db = db
         self.api_endpoint = "https://quotes.fl1yd.su/generate"
         self.settings = self.get_settings()
 
 
-    async def qcmd(self, message: types.Message):
+    async def qcmd(self, message: Message) -> None:
         """
-        Сокращение команды .sq
-        """
-
-        return await self.sqcmd(message)
-
-
-    async def sqcmd(self, message: Message):
-        """
-        Использование:
-
-        • .sq <кол-во сообщений> + <реплай> + <!file - скидывает файлом (по желанию)> + <цвет (по желанию)>
-        >>> .sq
-        >>> .sq 2 #2d2d2d
-        >>> .sq red
-        >>> .sq !file
+        <reply> [quantity] [!file] [color] - Create nice quote from message(-s)
         """
 
         args: List[str] = utils.get_args(message)
         if not await message.get_reply_message():
-            return await utils.answer(
-                message, self.strings["no_reply"])
+            await utils.answer(message, self.strings["no_reply"])
+            return
 
         isFile = "!file" in args
         [count] = [int(arg) for arg in args if arg.isdigit() and int(arg) > 0] or [1]
@@ -144,25 +129,16 @@ class ShitQuotesMod(loader.Module):
             "text_color": self.settings["text_color"]
         }
 
-        if self.settings["debug"]:
-            file = open("КвотесыDebug.json", "w")
-            json.dump(
-                payload, file, indent = 4,
-                ensure_ascii = False,
-            )
-            await message.respond(
-                file = file.name)
-
         r = await self._api_request(payload)
         if r.status_code != 200:
-            return await utils.answer(
-                message, self.strings["api_error"])
+            await utils.answer(message, self.strings["api_error"])
+            return
 
         quote = io.BytesIO(r.content)
         quote.name = "SQuote" + (".png" if isFile else ".webp")
 
-        await utils.answer(message, quote, force_document = isFile)
-        return await message[-1].delete()
+        await utils.answer(message, quote, force_document=isFile)
+        await (message[0] if isinstance(message, (list, tuple, set)) else message).delete()
 
 
     async def quote_parse_messages(self, message: Message, count: int):
@@ -257,35 +233,22 @@ class ShitQuotesMod(loader.Module):
 
 
     async def fsqcmd(self, message: Message):
-        """
-        Использование:
-
-        • .fsq <@ или ID> + <текст> - квота от юзера с @ или ID + указанный текст
-        >>> .fsq @onetimeusername Вам пизда
-
-        • .fsq <реплай> + <текст> - квота от юзера с реплая + указанный текст
-        >>> .fsq Я лох
-
-        • .fsq <@ или ID> + <текст> + -r + <@ или ID> + <текст> - квота с фейковым реплаем
-        >>> .fsq @Fl1yd спасибо -r @onetimeusername Ты крутой
-
-        • .fsq <@ или ID> + <текст> + -r + <@ или ID> + <текст>; <аргументы> - квота с фейковыми мульти сообщениями
-        >>> .fsq @onetimeusername Пацаны из @sh1tchannel, ждите награду за ахуенный ботнет; @elonmuskplssuckmybigdick чево; @Fl1yd НАШ БОТНЕТ ЛУЧШИЙ -r @elonmuskplssuckmybigdick чево
-        """
+        """<@ / ID> + <text> + -r + <@ / ID> + <text>; <args> - Create fake quote"""
 
         args: str = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not (args or reply):
-            return await utils.answer(
-                message, self.strings["no_args_or_reply"])
+            await utils.answer(message, self.strings["no_args_or_reply"])
+            return
 
         try:
             payload = await self.fakequote_parse_messages(args, reply)
         except (IndexError, ValueError):
-            return await utils.answer(
+            await utils.answer(
                 message, self.strings["args_error"].format(
                     message.text)
             )
+            return
 
         payload = {
             "messages": payload,
@@ -293,26 +256,16 @@ class ShitQuotesMod(loader.Module):
             "text_color": self.settings["text_color"]
         }
 
-        if self.settings["debug"]:
-            file = open("КвотесыDebug.json", "w")
-            json.dump(
-                payload, file, indent = 4,
-                ensure_ascii = False,
-            )
-            await message.respond(
-                file = file.name)
-
-
         r = await self._api_request(payload)
         if r.status_code != 200:
-            return await utils.answer(
-                message, self.strings["api_error"])
+            await utils.answer(message, self.strings["api_error"])
+            return
 
         quote = io.BytesIO(r.content)
         quote.name = "SQuote.webp"
 
         await utils.answer(message, quote)
-        return await message[-1].delete()
+        await (message[0] if isinstance(message, (list, tuple, set)) else message).delete()
 
 
     async def fakequote_parse_messages(self, args: str, reply: Message):
@@ -397,79 +350,60 @@ class ShitQuotesMod(loader.Module):
             base64.b64encode(avatar).decode() if avatar else None
 
 
-    async def sqsetcmd(self, message: Message):
-        """
-        Использование:
-
-        • .sqset <bg_color/text_color/debug> (<цвет для bg_color/text_color> <True/False для debug>)
-        >>> .sqset bg_color #2d2d2d
-        >>> .sqset debug true
-        """
-
-        args: List[str] = utils.get_args_raw(message).split(maxsplit = 1)
+    async def sqsetcmd(self, message: Message) -> None:
+        """<bg_color/text_color> <value> - Configure SQuotes"""
+        args: List[str] = utils.get_args_raw(message).split(maxsplit=1)
         if not args:
             return await utils.answer(
                 message,
-                f"<b>[Квотесы]</b> Настройки:\n\n"
-                f"Максимум сообщений (<code>max_messages</code>): {self.settings['max_messages']}\n"
-                f"Цвет квоты (<code>bg_color</code>): {self.settings['bg_color']}\n"
-                f"Цвет текста (<code>text_color</code>): {self.settings['text_color']}\n"
-                f"Дебаг (<code>debug</code>): {self.settings['debug']}\n\n"
-                f"Настроить можно с помощью <code>.sqset</code> <параметр> <значение> или <code>reset</code>"
+                f"<b>[SQuotes]</b> Settings:\n\n"
+                f"Max messages (<code>max_messages</code>): {self.settings['max_messages']}\n"
+                f"Background color (<code>bg_color</code>): {self.settings['bg_color']}\n"
+                f"Foreground color (<code>text_color</code>): {self.settings['text_color']}"
             )
 
         if args[0] == "reset":
             self.get_settings(True)
-            return await utils.answer(
-                message, "<b>[Квотесы - Settings]</b> Настойки квот были сброшены")
+            await utils.answer(message, "<b>[SQuotes]</b> Settings has been reset")
+            return
 
         if len(args) < 2:
-            return await utils.answer(
-                message, "<b>[Квотесы - Settings]</b> Недостаточно аргументов")
+            await utils.answer(message, "<b>[SQuotes]</b> Insufficient args")
+            return
 
-        mods = ["max_messages", "bg_color", "text_color", "debug"]
+        mods = ["max_messages", "bg_color", "text_color"]
         if args[0] not in mods:
-            return await utils.answer(
-                message, f"<b>[Квотесы - Settings]</b> Такого парамерта нет, есть {', '.join(mods)}")
-
-        elif args[0] == "debug":
-            if args[1].lower() not in ["true", "false"]:
-                return await utils.answer(
-                    message, "<b>[Квотесы - Settings]</b> Такого значения параметра нет, есть true/false")
-            self.settings[args[0]] = args[1].lower() == "true"
-
+            await utils.answer(message, f"<b>[SQuotes]</b> Unknown param")
+            return
         elif args[0] == "max_messages":
             if not args[1].isdigit():
-                return await utils.answer(
-                    message, "<b>[Квотесы - Settings]</b> Это не число")
+                await utils.answer(message, "<b>[SQuotes]</b> Number is expected")
+                return
+
             self.settings[args[0]] = int(args[1])
 
         else:
             self.settings[args[0]] = args[1]
 
-        self.db.set("Квотесы", "settings", self.settings)
+        self.db.set("SQuotes", "settings", self.settings)
         return await utils.answer(
-            message, f"<b>[Квотесы - Settings]</b> Значение параметра {args[0]} было выставлено на {args[1]}")
+            message, f"<b>[SQuotes]</b> Param {args[0]} value is now {args[1]}")
 
 
     def get_settings(self, force: bool = False):
-        settings: dict = self.db.get(
-            "Квотесы", "settings", {}
-        )
+        settings: dict = self.db.get("SQuotes", "settings", {})
         if not settings or force:
             settings.update(
                 {
                     "max_messages": 15,
                     "bg_color": "#162330",
-                    "text_color": "#fff",
-                    "debug": False
+                    "text_color": "#fff"
                 }
             )
-            self.db.set("Квотесы", "settings", settings)
+            self.db.set("SQuotes", "settings", settings)
 
         return settings
 
 
     async def _api_request(self, data: dict):
-        return await utils.run_sync(
-            requests.post, self.api_endpoint, json = data)
+        return await utils.run_sync(requests.post, self.api_endpoint, json=data)

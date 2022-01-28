@@ -41,7 +41,7 @@ class dict(dict):
         self[attr] = value
 
 
-BUILD_ID = "96b0cc3e-dca7-4b79-8db2-43a478b00f9a"  # null to disable autoupdates
+BUILD_ID = null  # null to disable autoupdates
 MODULE_PATH = "https://quotes.mishase.dev/f/module.py"
 
 
@@ -212,28 +212,28 @@ class MessagePacker:
 
         text = msg.message
         if text:
-            obj.text = text
+            obj['text'] = text
 
         entities = MessagePacker.encodeEntities(msg.entities or [])
         if entities:
-            obj.entities = entities
+            obj['entities'] = entities
 
         media = msg.media
         if media:
             file = await self.downloadMedia(media)
             if file:
-                obj.picture = {
+                obj['picture'] = {
                     "file": file
                 }
 
         if "text" not in obj and "picture" not in obj:
             return null
 
-        obj.author = await self.encodeAuthor(msg)
+        obj['author'] = await self.encodeAuthor(msg)
 
         reply = await msg.get_reply_message()
         if reply:
-            obj.reply = await self.encodeReply(reply)
+            obj['reply'] = await self.encodeReply(reply)
 
         return obj
 
@@ -312,14 +312,14 @@ class MessagePacker:
 
         uid, name, picture, adminTitle = await self.getAuthor(msg)
 
-        obj.id = uid
-        obj.name = name
+        obj['id'] = uid
+        obj['name'] = name
         if picture:
-            obj.picture = {
+            obj['picture'] = {
                 "file": picture
             }
         if adminTitle:
-            obj.adminTitle = adminTitle
+            obj['adminTitle'] = adminTitle
 
         return obj
 
@@ -389,7 +389,7 @@ class MessagePacker:
 
         text = reply.message
         if text:
-            obj.text = text
+            obj['text'] = text
         else:
             media = reply.media
             if media:
@@ -397,13 +397,13 @@ class MessagePacker:
                 obj.text = "📷 Photo" if t is MessageMediaPhoto else "💾 File"
         name = (await self.getAuthor(reply, full=false))[1]
 
-        obj.author = name
+        obj['author'] = name
 
         media = reply.media
         if media:
             file = await self.downloadMedia(media, -1)
             if file:
-                obj.thumbnail = {
+                obj['thumbnail'] = {
                     "file": file
                 }
 
