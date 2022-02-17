@@ -4,18 +4,18 @@ from asyncio import sleep
 
 @loader.tds
 class ILYMod(loader.Module):
-	"""Та самая анимация с сердечками"""
+	"""Famous TikTok hearts animation implemented in FTG"""
 	strings = {
 		"name": "LoveMagic"
 	}	
 	
 	async def ilycmd(self, message: "telethon.tl.types.Message") -> None:
-		"""Крутая анимация..."""
+		"""This famous TikTok animation..."""
 		if not message.out:
-			message = await message.respond('iloveyou')
+			message = await message.respond('ily')
 
 		arr = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "💖"]
-		h = "🖤"
+		h = "🤍"
 		first_block = ""		
 		for i in "".join([
 				h * 9, "\n",
@@ -66,7 +66,7 @@ class ILYMod(loader.Module):
 			h * 9])
 		await message.edit(fourth)
 		for _ in range(47):
-			fourth = fourth.replace("❤️", "🖤", 1)
+			fourth = fourth.replace("🤍", "❤️", 1)
 			await message.edit(fourth)
 			await sleep(0.07)
 		for i in range(8):
