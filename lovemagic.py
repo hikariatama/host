@@ -14,7 +14,7 @@ class ILYMod(loader.Module):
 		if not message.out:
 			message = await message.respond('iloveyou')
 
-		arr = ["🤍", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "💖"]
+		arr = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "💖"]
 		h = "🖤"
 		first_block = ""		
 		for i in "".join([
@@ -66,7 +66,7 @@ class ILYMod(loader.Module):
 			h * 9])
 		await message.edit(fourth)
 		for _ in range(47):
-			fourth = fourth.replace("🤍", "🖤", 1)
+			fourth = fourth.replace("❤️", "🖤", 1)
 			await message.edit(fourth)
 			await sleep(0.07)
 		for i in range(8):
