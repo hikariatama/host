@@ -66,12 +66,12 @@ class ILYMod(loader.Module):
 			h * 9])
 		await message.edit(fourth)
 		for _ in range(47):
-			fourth = fourth.replace("🤍", "❤️", 1)
+			fourth = fourth.replace("🤍", "🖤", 1)
 			await message.edit(fourth)
 			await sleep(0.07)
 		for i in range(8):
 			await message.edit((arr[0] * (8 - i) + "\n") * (8 - i))
 			await sleep(0.3)
-		for i in ["Я", "Я тебя", "Я тебя ❤️", "Я тебя ❤️!"]:
+		for i in ["Я", "Я тебя", "Я тебя 🖤", "Я тебя 🖤!"]:
 			await message.edit(f"<b>{i}</b>")
 			await sleep(0.2)
