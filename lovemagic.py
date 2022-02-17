@@ -14,8 +14,8 @@ class ILYMod(loader.Module):
 		if not message.out:
 			message = await message.respond('iloveyou')
 
-		arr = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "💖"]
-		h = "🤍"
+		arr = ["🤍", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "💖"]
+		h = "🖤"
 		first_block = ""		
 		for i in "".join([
 				h * 9, "\n",
