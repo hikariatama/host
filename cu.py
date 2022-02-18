@@ -40,26 +40,18 @@ class CuMod(loader.Module):
             if not s: await message.edit("Кого?") 
             return
         if s: await message.delete()
-        if not s: 
-            for i in range(11): 
-                await message.edit(f"Получаем доступ к аккаунту пользователя [{i*10}%]\n[{(i*'#').ljust(10, '–')}]") 
-                await sleep(0.3)
+
         if a: 
             avs = await message.client.get_profile_photos('me') 
             if len(avs) > 0: 
                 await message.client(functions.photos.DeletePhotosRequest(await message.client.get_profile_photos('me')))
         full = await message.client(GetFullUserRequest(user.id))
-        if not s: await message.edit("Получаем аватарку... [35%]\n[###–––––––]")
-        if full.profile_photo: 
+        if full.full_user.profile_photo: 
             up = await message.client.upload_file(await message.client.download_profile_photo(user, bytes)) 
-            if not s: await message.edit("Ставим аватарку... [50%]\n[#####–––––]") 
             await message.client(functions.photos.UploadProfilePhotoRequest(up))
-        if not s: await message.edit("Получаем данные...  [99%]\n[#########–]")
         await message.client(UpdateProfileRequest( 
             user.first_name if user.first_name != None else "", 
             user.last_name if user.last_name != None else "", 
-            full.about[:70] if full.about != None else "" 
+            full.full_user.about[:70] if full.full_user.about != None else "" 
         ))
-        if not s: await message.edit("Аккаунт клонирован! [100%]\n[##########]")
-        if not s: await sleep(5)
         if not s: await message.edit("Аккаунт клонирован!")
