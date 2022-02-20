@@ -155,6 +155,9 @@ class BlockNonDiscussionMod(loader.Module):
             return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
 
     async def watcher(self, message):
+        if not getattr(message, 'raw_text', False):
+            return
+
         bnd = self._db.get(__name__, "bnd", [])
         sets = self._db.get(__name__, "sets", {})
         chatid = message.chat_id
