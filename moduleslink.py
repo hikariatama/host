@@ -21,7 +21,7 @@ class ModulesLinkMod(loader.Module):
             if "http" not in link: 
                 text = f"<b>🧳 {utils.escape_html(f)}</b>" 
             else: 
-                text = f"<b><a href=\"{link}\">Link</a> for {utils.escape_html(f)}:</b> <code>{link}</code>" 
+                text = f"🧳 <b><a href=\"{link}\">Link</a> for {utils.escape_html(f)}:</b> <code>{link}</code>" 
 
             out = io.BytesIO(r.__loader__.data)
             out.name = f'{f}.py'
