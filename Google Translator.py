@@ -16,17 +16,20 @@
 
 import logging
 import os
+
 try:
     import googletrans
 except ImportError:
-    os.popen('python3 -m pip install googletrans==4.0.0-rc1').read()
+    os.popen("python3 -m pip install googletrans==4.0.0-rc1").read()
     import googletrans
 
 from .. import loader, utils
 
 if googletrans.__version__ != "4.0.0-rc.1":
-    raise KeyError(f"The googletrans version is {googletrans.__version__}, not \"4.0.0-rc.1\"."
-                   "It means the module cannot run properly. To fix this, reinstall googletrans==4.0.0-rc1.")
+    raise KeyError(
+        f'The googletrans version is {googletrans.__version__}, not "4.0.0-rc.1".'
+        "It means the module cannot run properly. To fix this, reinstall googletrans==4.0.0-rc1."
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -39,15 +42,19 @@ def register(cb):
 @loader.tds
 class GTranslateMod(loader.Module):
     """Google Translator"""
-    strings = {"name": "Google Translator",
-               "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-               "invalid_text": "Invalid text to translate",
-               "split_error": "Python split() error, if there is -> in the text, it must split!"
-               }
+
+    strings = {
+        "name": "Google Translator",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "invalid_text": "Invalid text to translate",
+        "split_error": "Python split() error, if there is -> in the text, it must split!",
+    }
 
     def __init__(self):
         self.commands = {"gtranslate": self.gtranslatecmd}
-        self.config = loader.ModuleConfig("DEFAULT_LANG", "en", "Language to translate to by default")
+        self.config = loader.ModuleConfig(
+            "DEFAULT_LANG", "en", "Language to translate to by default"
+        )
 
     def config_complete(self):
         self.name = self.strings["name"]
@@ -80,8 +87,14 @@ class GTranslateMod(loader.Module):
             args[1] = self.config["DEFAULT_LANG"]
         args[0] = args[0].lower()
         logger.debug(args)
-        translated = (await utils.run_sync(self.tr.translate, text, dest=args[1], src=args[0])).text
+        translated = (
+            await utils.run_sync(self.tr.translate, text, dest=args[1], src=args[0])
+        ).text
         ret = self.strings["translated"]
-        ret = ret.format(text=utils.escape_html(text), frlang=utils.escape_html(args[0]),
-                         to=utils.escape_html(args[1]), output=utils.escape_html(translated))
+        ret = ret.format(
+            text=utils.escape_html(text),
+            frlang=utils.escape_html(args[0]),
+            to=utils.escape_html(args[1]),
+            output=utils.escape_html(translated),
+        )
         await utils.answer(message, ret)

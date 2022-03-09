@@ -68,7 +68,8 @@ def get_message_text(message: Message, reply: bool = False):
         else f"🎧 Музыка: {strftime(message.audio.attributes[0].duration)} | {message.audio.attributes[0].performer} - {message.audio.attributes[0].title}"
         if message.audio
         else f"💾 Файл: {message.file.name}"
-        if type(message.media) == types.MessageMediaDocument and not get_message_media(message)
+        if type(message.media) == types.MessageMediaDocument
+        and not get_message_media(message)
         else f"{message.media.emoticon} Дайс: {message.media.value}"
         if type(message.media) == types.MessageMediaDice
         else f"Service message: {message.action.to_dict()['_']}"
@@ -80,12 +81,8 @@ def get_message_text(message: Message, reply: bool = False):
 def strftime(time: Union[int, float]):
     t = gmtime(time)
     return (
-        (
-            f"{t.tm_hour:02d}:"
-            if t.tm_hour > 0
-            else ""
-        ) + f"{t.tm_min:02d}:{t.tm_sec:02d}"
-    )
+        f"{t.tm_hour:02d}:" if t.tm_hour > 0 else ""
+    ) + f"{t.tm_min:02d}:{t.tm_sec:02d}"
 
 
 @loader.tds
@@ -108,7 +105,6 @@ class ShitQuotesMod(loader.Module):
         self.api_endpoint = "https://quotes.fl1yd.su/generate"
         self.settings = self.get_settings()
 
-
     async def qcmd(self, message: Message) -> None:
         """
         <reply> [quantity] [!file] [color] - Create nice quote from message(-s)
@@ -121,12 +117,14 @@ class ShitQuotesMod(loader.Module):
 
         isFile = "!file" in args
         [count] = [int(arg) for arg in args if arg.isdigit() and int(arg) > 0] or [1]
-        [bg_color] = [arg for arg in args if arg != "!file" and not arg.isdigit()] or [self.settings["bg_color"]]
+        [bg_color] = [arg for arg in args if arg != "!file" and not arg.isdigit()] or [
+            self.settings["bg_color"]
+        ]
 
         payload = {
             "messages": await self.quote_parse_messages(message, count),
             "quote_color": bg_color,
-            "text_color": self.settings["text_color"]
+            "text_color": self.settings["text_color"],
         }
 
         r = await self._api_request(payload)
@@ -138,15 +136,20 @@ class ShitQuotesMod(loader.Module):
         quote.name = "SQuote" + (".png" if isFile else ".webp")
 
         await utils.answer(message, quote, force_document=isFile)
-        await (message[0] if isinstance(message, (list, tuple, set)) else message).delete()
-
+        await (
+            message[0] if isinstance(message, (list, tuple, set)) else message
+        ).delete()
 
     async def quote_parse_messages(self, message: Message, count: int):
         payloads = []
         messages = [
-            msg async for msg in self.client.iter_messages(
-                message.chat_id, count, reverse = True, add_offset = 1,
-                offset_id = (await message.get_reply_message()).id,
+            msg
+            async for msg in self.client.iter_messages(
+                message.chat_id,
+                count,
+                reverse=True,
+                add_offset=1,
+                offset_id=(await message.get_reply_message()).id,
             )
         ]
 
@@ -166,7 +169,15 @@ class ShitQuotesMod(loader.Module):
                         name, avatar = await self.get_profile_data(message.sender)
                         return (
                             "Вот блин, произошла ошибка. Возможно на этом канале тебя забанили, и невозможно получить информацию.",
-                            None, message.sender.id, name, avatar, "ошибка :(", None, None, None, None
+                            None,
+                            message.sender.id,
+                            name,
+                            avatar,
+                            "ошибка :(",
+                            None,
+                            None,
+                            None,
+                            None,
                         )
                     name, avatar = await self.get_profile_data(user)
                     user_id = user.id
@@ -188,25 +199,31 @@ class ShitQuotesMod(loader.Module):
                 user_id = user.id
 
                 if message.is_group and message.is_channel:
-                    admins = await self.client.get_participants(message.chat_id, filter = types.ChannelParticipantsAdmins)
+                    admins = await self.client.get_participants(
+                        message.chat_id, filter=types.ChannelParticipantsAdmins
+                    )
                     if user in admins:
                         admin = admins[admins.index(user)].participant
-                        rank = admin.rank or ("creator" if type(admin) == types.ChannelParticipantCreator else "admin")
+                        rank = admin.rank or (
+                            "creator"
+                            if type(admin) == types.ChannelParticipantCreator
+                            else "admin"
+                        )
 
-            media = await self.client.download_media(get_message_media(message), bytes, thumb = -1)
+            media = await self.client.download_media(
+                get_message_media(message), bytes, thumb=-1
+            )
             media = base64.b64encode(media).decode() if media else None
 
             via_bot = message.via_bot.username if message.via_bot else None
-            text = (
-                (message.raw_text or "") + (
-                    (
-                        "\n\n" + get_message_text(message)
-                        if message.raw_text
-                        else get_message_text(message)
-                    )
-                    if get_message_text(message)
-                    else ""
+            text = (message.raw_text or "") + (
+                (
+                    "\n\n" + get_message_text(message)
+                    if message.raw_text
+                    else get_message_text(message)
                 )
+                if get_message_text(message)
+                else ""
             )
 
             payloads.append(
@@ -219,18 +236,13 @@ class ShitQuotesMod(loader.Module):
                         "name": name,
                         "avatar": avatar,
                         "rank": rank or "",
-                        "via_bot": via_bot
+                        "via_bot": via_bot,
                     },
-                    "reply": {
-                        "id": reply_id,
-                        "name": reply_name,
-                        "text": reply_text
-                    }
+                    "reply": {"id": reply_id, "name": reply_name, "text": reply_text},
                 }
             )
 
         return payloads
-
 
     async def fsqcmd(self, message: Message):
         """<@ / ID> + <text> + -r + <@ / ID> + <text>; <args> - Create fake quote"""
@@ -244,16 +256,13 @@ class ShitQuotesMod(loader.Module):
         try:
             payload = await self.fakequote_parse_messages(args, reply)
         except (IndexError, ValueError):
-            await utils.answer(
-                message, self.strings["args_error"].format(
-                    message.text)
-            )
+            await utils.answer(message, self.strings["args_error"].format(message.text))
             return
 
         payload = {
             "messages": payload,
             "quote_color": self.settings["bg_color"],
-            "text_color": self.settings["text_color"]
+            "text_color": self.settings["text_color"],
         }
 
         r = await self._api_request(payload)
@@ -265,20 +274,23 @@ class ShitQuotesMod(loader.Module):
         quote.name = "SQuote.webp"
 
         await utils.answer(message, quote)
-        await (message[0] if isinstance(message, (list, tuple, set)) else message).delete()
-
+        await (
+            message[0] if isinstance(message, (list, tuple, set)) else message
+        ).delete()
 
     async def fakequote_parse_messages(self, args: str, reply: Message):
         async def get_user(args: str):
             args_, text = args.split(), ""
             user = await self.client.get_entity(
-                int(args_[0]) if args_[0].isdigit() else args_[0])
+                int(args_[0]) if args_[0].isdigit() else args_[0]
+            )
 
             if len(args_) < 2:
                 user = await self.client.get_entity(
-                    int(args) if args.isdigit() else args)
+                    int(args) if args.isdigit() else args
+                )
             else:
-                text = args.split(maxsplit = 1)[1]
+                text = args.split(maxsplit=1)[1]
             return user, text
 
         if reply or reply and args:
@@ -294,8 +306,8 @@ class ShitQuotesMod(loader.Module):
                 reply_id = reply_name = reply_text = None
 
                 if " -r " in part:
-                    user, text = await get_user(''.join(part.split(" -r ")[0]))
-                    user2, text2 = await get_user(''.join(part.split(" -r ")[1]))
+                    user, text = await get_user("".join(part.split(" -r ")[0]))
+                    user2, text2 = await get_user("".join(part.split(" -r ")[1]))
 
                     name, avatar = await self.get_profile_data(user)
                     name2, _ = await self.get_profile_data(user2)
@@ -313,13 +325,13 @@ class ShitQuotesMod(loader.Module):
                             "id": user.id,
                             "name": name,
                             "avatar": avatar,
-                            "rank": ""
+                            "rank": "",
                         },
                         "reply": {
                             "id": reply_id,
                             "name": reply_name,
-                            "text": reply_text
-                        }
+                            "text": reply_text,
+                        },
                     }
                 )
             return messages
@@ -329,26 +341,17 @@ class ShitQuotesMod(loader.Module):
                 "text": text,
                 "media": None,
                 "entities": None,
-                "author": {
-                    "id": user.id,
-                    "name": name,
-                    "avatar": avatar,
-                    "rank": ""
-                },
-                "reply": {
-                    "id": None,
-                    "name": None,
-                    "text": None
-                }
+                "author": {"id": user.id, "name": name, "avatar": avatar, "rank": ""},
+                "reply": {"id": None, "name": None, "text": None},
             }
         ]
 
-
     async def get_profile_data(self, user: types.User):
         avatar = await self.client.download_profile_photo(user.id, bytes)
-        return telethon.utils.get_display_name(user), \
-            base64.b64encode(avatar).decode() if avatar else None
-
+        return (
+            telethon.utils.get_display_name(user),
+            base64.b64encode(avatar).decode() if avatar else None,
+        )
 
     async def sqsetcmd(self, message: Message) -> None:
         """<bg_color/text_color> <value> - Configure SQuotes"""
@@ -359,7 +362,7 @@ class ShitQuotesMod(loader.Module):
                 f"<b>[SQuotes]</b> Settings:\n\n"
                 f"Max messages (<code>max_messages</code>): {self.settings['max_messages']}\n"
                 f"Background color (<code>bg_color</code>): {self.settings['bg_color']}\n"
-                f"Foreground color (<code>text_color</code>): {self.settings['text_color']}"
+                f"Foreground color (<code>text_color</code>): {self.settings['text_color']}",
             )
 
         if args[0] == "reset":
@@ -387,23 +390,18 @@ class ShitQuotesMod(loader.Module):
 
         self.db.set("SQuotes", "settings", self.settings)
         return await utils.answer(
-            message, f"<b>[SQuotes]</b> Param {args[0]} value is now {args[1]}")
-
+            message, f"<b>[SQuotes]</b> Param {args[0]} value is now {args[1]}"
+        )
 
     def get_settings(self, force: bool = False):
         settings: dict = self.db.get("SQuotes", "settings", {})
         if not settings or force:
             settings.update(
-                {
-                    "max_messages": 15,
-                    "bg_color": "#162330",
-                    "text_color": "#fff"
-                }
+                {"max_messages": 15, "bg_color": "#162330", "text_color": "#fff"}
             )
             self.db.set("SQuotes", "settings", settings)
 
         return settings
-
 
     async def _api_request(self, data: dict):
         return await utils.run_sync(requests.post, self.api_endpoint, json=data)

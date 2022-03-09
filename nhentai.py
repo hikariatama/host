@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 class NHentaiMod(loader.Module):
     """Hentai module 18+"""
 
-    strings = {"name": "NHentai",
-               }
+    strings = {
+        "name": "NHentai",
+    }
 
     def StringBuilder(self, Hentai):
         id_nh = Hentai.id
@@ -79,7 +80,9 @@ class NHentaiMod(loader.Module):
             try:
                 hentai_info = Hentai(args[0])
                 text = self.StringBuilder(hentai_info)
-                await message.client.send_file(message.chat_id, hentai_info.cover, caption=text)
+                await message.client.send_file(
+                    message.chat_id, hentai_info.cover, caption=text
+                )
             except HTTPError as e:
                 await utils.answer(message, str(e))
                 await asyncio.sleep(5)
@@ -88,4 +91,3 @@ class NHentaiMod(loader.Module):
             await utils.answer(message, "Pls id")
             await asyncio.sleep(5)
             await message.delete()
-            

@@ -21,7 +21,7 @@ from pydub import AudioSegment, effects
 
 
 async def audionormalizer(bytes_io_file, fn, fe):
-    #return bytes_io_file, fn, fe
+    # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     rawsound = AudioSegment.from_file(bytes_io_file, "wav")
@@ -34,29 +34,53 @@ async def audionormalizer(bytes_io_file, fn, fe):
 
 
 async def audiohandler(bytes_io_file, fn, fe):
-    #return bytes_io_file, fn, fe
+    # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     content = bytes_io_file.getvalue()
-    cmd = ['ffmpeg', '-y', '-i', 'pipe:', '-acodec', 'pcm_s16le', '-f', 'wav', '-ac', '1', 'pipe:']
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        "pipe:",
+        "-acodec",
+        "pcm_s16le",
+        "-f",
+        "wav",
+        "-ac",
+        "1",
+        "pipe:",
+    ]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
-    bytes_io_file.name =  fn + ".wav"
+    bytes_io_file.name = fn + ".wav"
     fn, fe = os.path.splitext(bytes_io_file.name)
-    return BytesIO(out), fn, fe if out.startswith(b'RIFF\xff\xff\xff') else None
+    return BytesIO(out), fn, fe if out.startswith(b"RIFF\xff\xff\xff") else None
 
 
 async def makewaves(bytes_io_file, fn, fe):
-    #return bytes_io_file, fn, fe
+    # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     content = bytes_io_file.getvalue()
-    cmd = ['ffmpeg', '-y', '-i', 'pipe:', '-c:a', 'libopus', '-f', 'opus', '-ac', '2', 'pipe:']
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        "pipe:",
+        "-c:a",
+        "libopus",
+        "-f",
+        "opus",
+        "-ac",
+        "2",
+        "pipe:",
+    ]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
-    bytes_io_file.name =  fn + ".opus"
+    bytes_io_file.name = fn + ".opus"
     fn, fe = os.path.splitext(bytes_io_file.name)
     return BytesIO(out), fn, fe
 
@@ -79,7 +103,7 @@ async def speedup(bytes_io_file, fn, fe, speed):
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
     y_shift = pyrubberband.pitch_shift(y, sr, speed)
     bytes_io_file.seek(0)
-    soundfile.write(bytes_io_file, y_stretch, sr, format='wav')
+    soundfile.write(bytes_io_file, y_stretch, sr, format="wav")
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + ".wav"
     return bytes_io_file, fn, fe
@@ -87,18 +111,22 @@ async def speedup(bytes_io_file, fn, fe, speed):
 
 @loader.tds
 class TTSMod(loader.Module):
-    strings = {"name": "Text to speech",
-               "tts_lang_cfg": "Set your language code for the TTS here.",
-               "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
-               "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
-               "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
-               "tts_needs_text": "<b>[TTS]</b> I need some text to convert to speech!",
-               "processing": "<b>[TTS]</b> Message is being processed ...",
-               "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
-               "speech_speed": ("<b>[TTS]</b> Speech speed set to {}x.")}
+    strings = {
+        "name": "Text to speech",
+        "tts_lang_cfg": "Set your language code for the TTS here.",
+        "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
+        "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
+        "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
+        "tts_needs_text": "<b>[TTS]</b> I need some text to convert to speech!",
+        "processing": "<b>[TTS]</b> Message is being processed ...",
+        "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
+        "speech_speed": ("<b>[TTS]</b> Speech speed set to {}x."),
+    }
 
     def __init__(self):
-        self.config = loader.ModuleConfig("TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m))        
+        self.config = loader.ModuleConfig(
+            "TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m)
+        )
 
     async def client_ready(self, client, db):
         self._db = db
@@ -140,7 +168,6 @@ class TTSMod(loader.Module):
         voice.name = fn + fe
         await utils.answer(message, voice, voice_note=True)
 
-
     async def speedvccmd(self, message):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
@@ -173,13 +200,14 @@ class TTSMod(loader.Module):
         voice.name = fn + fe
         await utils.answer(message, voice, voice_note=True)
 
-
     async def ttsspeedcmd(self, message):
         """Set the desired speech speed
-          - Example: .ttsspeed 1.5 (Would be 1.5x speed)
-            Possible values between 0.25 and 3"""
+        - Example: .ttsspeed 1.5 (Would be 1.5x speed)
+          Possible values between 0.25 and 3"""
         speed = utils.get_args_raw(message)
         if not represents_speed(speed):
             return await utils.answer(message, self.strings("no_speed", message))
         self._db.set(__name__, "speech_speed", speed)
-        await utils.answer(message, self.strings("speech_speed", message).format(str(speed)))
+        await utils.answer(
+            message, self.strings("speech_speed", message).format(str(speed))
+        )

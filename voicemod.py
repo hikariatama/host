@@ -20,12 +20,13 @@ from typing import *
 
 from .. import loader, utils
 
+
 @loader.unrestricted
 @loader.ratelimit
 @loader.tds
 class VoiceMod(loader.Module):
-    """Module for working with voicechat
-    """
+    """Module for working with voicechat"""
+
     strings = {
         "name": "VoiceMod",
         "downloading": "<b>[VoiceMod]</b> Downloading...",
@@ -43,22 +44,24 @@ class VoiceMod(loader.Module):
         "error": "<b>[VoiceMod]</b> Error: <code>{}</code>",
     }
     ytdlopts = {
-            'format': 'bestaudio',
-            'addmetadata': True,
-            'key': 'FFmpegMetadata',
-            'writethumbnail': True,
-            'prefer_ffmpeg': True,
-            'geo_bypass': True,
-            'nocheckcertificate': True,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
-            }],
-            'outtmpl': 'ytdl_out.mp3',
-            'quiet': True,
-            'logtostderr': False
-        }
+        "format": "bestaudio",
+        "addmetadata": True,
+        "key": "FFmpegMetadata",
+        "writethumbnail": True,
+        "prefer_ffmpeg": True,
+        "geo_bypass": True,
+        "nocheckcertificate": True,
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "320",
+            }
+        ],
+        "outtmpl": "ytdl_out.mp3",
+        "quiet": True,
+        "logtostderr": False,
+    }
     group_calls: Dict[int, GroupCallFile] = {}
 
     tag = "<b>[Shazam]</b> "
@@ -75,14 +78,15 @@ class VoiceMod(loader.Module):
             try:
                 chat = (await m.client.get_entity(chat)).id
             except Exception as e:
-                await utils.answer(m, self.strings('error').format(str(e)))
+                await utils.answer(m, self.strings("error").format(str(e)))
                 return None
         return chat
 
     def _call(self, m: types.Message, chat: int):
         if str(chat) not in self.group_calls:
             self.group_calls[str(chat)] = GroupCallFactory(
-                m.client, pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.TELETHON).get_file_group_call()
+                m.client, pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.TELETHON
+            ).get_file_group_call()
 
     async def client_ready(self, client, db):
         self.client = client
@@ -95,8 +99,8 @@ class VoiceMod(loader.Module):
         r = await m.get_reply_message()
         chat = from_file = link = None
         if args:
-            _ = re.match(r'(-?\d+|@[A-Za-z0-9_]{5,})\s+(.*)', args)
-            __ = re.match(r'(-?\d+|@[A-Za-z0-9_]{5,})', args)
+            _ = re.match(r"(-?\d+|@[A-Za-z0-9_]{5,})\s+(.*)", args)
+            __ = re.match(r"(-?\d+|@[A-Za-z0-9_]{5,})", args)
             if _:
                 chat = _.group(1)
                 link = _.group(2)
@@ -112,18 +116,18 @@ class VoiceMod(loader.Module):
             try:
                 chat = (await m.client.get_entity(chat)).id
             except Exception as e:
-                return await utils.answer(m, self.strings('error').format(str(e)))
+                return await utils.answer(m, self.strings("error").format(str(e)))
         else:
             chat = m.chat.id
         if r and r.audio and not link:
             from_file = True
         if not link and (not r or not r.audio):
-            return utils.answer(m, 'no audio/link')
+            return utils.answer(m, "no audio/link")
         if str(chat) not in self.group_calls:
-            return await utils.answer(m, self.strings('plsjoin'))
+            return await utils.answer(m, self.strings("plsjoin"))
         self._call(m, chat)
-        input_file = f'{chat}.raw'
-        m = await utils.answer(m, self.strings('downloading'))
+        input_file = f"{chat}.raw"
+        m = await utils.answer(m, self.strings("downloading"))
         if from_file:
             audio_original = await r.download_media()
         else:
@@ -131,14 +135,14 @@ class VoiceMod(loader.Module):
                 with YoutubeDL(self.ytdlopts) as rip:
                     rip.extract_info(link)
             except Exception as e:
-                return await utils.answer(m, self.strings('error').format(str(e)))
-            audio_original = 'ytdl_out.mp3'
-        m = await utils.answer(m, self.strings('converting'))
+                return await utils.answer(m, self.strings("error").format(str(e)))
+            audio_original = "ytdl_out.mp3"
+        m = await utils.answer(m, self.strings("converting"))
         ffmpeg.input(audio_original).output(
-            input_file, format='s16le', acodec='pcm_s16le', ac=2, ar='48k'
+            input_file, format="s16le", acodec="pcm_s16le", ac=2, ar="48k"
         ).overwrite_output().run()
         os.remove(audio_original)
-        await utils.answer(m, self.strings('playing'))
+        await utils.answer(m, self.strings("playing"))
         self.group_calls[str(chat)].input_filename = input_file
 
     async def vjoincmd(self, m: types.Message):
@@ -149,7 +153,7 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         await self.group_calls[str(chat)].start(chat)
-        await utils.answer(m, self.strings('join'))
+        await utils.answer(m, self.strings("join"))
 
     async def vleavecmd(self, m: types.Message):
         """.vleave
@@ -161,10 +165,10 @@ class VoiceMod(loader.Module):
         await self.group_calls[str(chat)].stop()
         del self.group_calls[str(chat)]
         try:
-            os.remove(f'{chat}.raw')
+            os.remove(f"{chat}.raw")
         except:
             pass
-        await utils.answer(m, self.strings('leave'))
+        await utils.answer(m, self.strings("leave"))
 
     async def vreplaycmd(self, m: types.Message):
         """.vreplay
@@ -174,7 +178,7 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         self.group_calls[str(chat)].restart_playout()
-        await utils.answer(m, self.strings('replay'))
+        await utils.answer(m, self.strings("replay"))
 
     async def vstopcmd(self, m: types.Message):
         """.vstop
@@ -184,7 +188,7 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         self.group_calls[str(chat)].stop_playout()
-        await utils.answer(m, self.strings('stop'))
+        await utils.answer(m, self.strings("stop"))
 
     async def vmutecmd(self, m: types.Message):
         """.vmute
@@ -194,7 +198,7 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         self.group_calls[str(chat)].set_is_mute(True)
-        await utils.answer(m, self.strings('unmute'))
+        await utils.answer(m, self.strings("unmute"))
 
     async def vunmutecmd(self, m: types.Message):
         """.vmute
@@ -204,7 +208,7 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         self.group_calls[str(chat)].set_is_mute(False)
-        await utils.answer(m, self.strings('mute'))
+        await utils.answer(m, self.strings("mute"))
 
     async def vpausecmd(self, m: types.Message):
         """.vpause
@@ -214,7 +218,7 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         self.group_calls[str(chat)].pause_playout()
-        await utils.answer(m, self.strings('pause'))
+        await utils.answer(m, self.strings("pause"))
 
     async def vresumecmd(self, m: types.Message):
         """.vresume
@@ -224,59 +228,73 @@ class VoiceMod(loader.Module):
             return
         self._call(m, chat)
         self.group_calls[str(chat)].resume_playout()
-        await utils.answer(m, self.strings('resume'))
-    
+        await utils.answer(m, self.strings("resume"))
+
     async def vdebugcmd(self, m: types.Message):
         """.vdebug
         debug"""
-        await utils.answer(m, f'DEBUG : {self.group_calls}')
+        await utils.answer(m, f"DEBUG : {self.group_calls}")
 
     @loader.unrestricted
     async def smcmd(self, message):
-        """.sm 
+        """.sm
         to find music."""
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not args:
-            return await utils.answer(message, "<b>No args.</b>") 
+            return await utils.answer(message, "<b>No args.</b>")
         try:
             message = await utils.answer(message, "<b>Loading...</b>")
             try:
                 message = message[0]
-            except: pass
-            music = await self.client.inline_query('lybot', args)
+            except:
+                pass
+            music = await self.client.inline_query("lybot", args)
             await message.delete()
-            await self.client.send_file(message.peer_id, music[0].result.document, reply_to=reply.id if reply else None)
-        except: return await self.client.send_message(message.chat_id, f"<b> Music named <code> {args} </code> not found. </b>")  
+            await self.client.send_file(
+                message.peer_id,
+                music[0].result.document,
+                reply_to=reply.id if reply else None,
+            )
+        except:
+            return await self.client.send_message(
+                message.chat_id,
+                f"<b> Music named <code> {args} </code> not found. </b>",
+            )
 
     async def shazamcmd(self, message):
         """.shazam <reply to audio> - recognize track"""
         s = await get_audio_shazam(message)
-        if not s: return
+        if not s:
+            return
         try:
             shazam = Shazam(s.track.read())
             recog = shazam.recognizeSong()
-            track = next(recog)[1]['track']
-            await self.client.send_file(message.peer_id, file=track['images']['background'],
-                   caption=self.tag + "recognized track: " + track['share']['subject'],
-                   reply_to=s.reply.id)
+            track = next(recog)[1]["track"]
+            await self.client.send_file(
+                message.peer_id,
+                file=track["images"]["background"],
+                caption=self.tag + "recognized track: " + track["share"]["subject"],
+                reply_to=s.reply.id,
+            )
             await message.delete()
-        except: await utils.answer(message, self.tag + "Could not recognize...")
+        except:
+            await utils.answer(message, self.tag + "Could not recognize...")
 
 
 async def get_audio_shazam(message):
-	class rct():
-		track = io.BytesIO()
-		reply = None
+    class rct:
+        track = io.BytesIO()
+        reply = None
 
-	reply = await message.get_reply_message()
-	if reply and reply.file and reply.file.mime_type.split("/")[0] == "audio":
-		ae = rct()
-		await utils.answer(message, "<b>Downloading...</b>")
-		ae.track = io.BytesIO(await reply.download_media(bytes))
-		ae.reply = reply
-		await utils.answer(message, "<b>Recognizing...</b>")
-		return ae
-	else:
-		await utils.answer(message, "<b>reply to audio...</b>")
-		return None  
+    reply = await message.get_reply_message()
+    if reply and reply.file and reply.file.mime_type.split("/")[0] == "audio":
+        ae = rct()
+        await utils.answer(message, "<b>Downloading...</b>")
+        ae.track = io.BytesIO(await reply.download_media(bytes))
+        ae.reply = reply
+        await utils.answer(message, "<b>Recognizing...</b>")
+        return ae
+    else:
+        await utils.answer(message, "<b>reply to audio...</b>")
+        return None

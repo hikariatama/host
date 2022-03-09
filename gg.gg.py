@@ -23,43 +23,61 @@ from requests import post
 
 logger = logging.getLogger(__name__)
 
+
 async def register(cb):
-	cb(WhoIsMod())
+    cb(WhoIsMod())
 
 
 @loader.tds
 class GGdotGGMod(loader.Module):
-	"""Сокращение ссылок через сервис gg.gg"""
-	strings = {
-		"name": "gg.gg",
-		"some_rong": "<b>Ты делаешь что-то не так!\nНапиши</b> <code>.help gg.gg</code> <b>для информации.</b>"
-	}
-	
-	async def client_ready(self, client, db):
-		self.client = client
-		
-	async def ggcmd(self, message):
-		""".gg <длинная ссылка или реплай на ссылку> """
-		m_text = utils.get_args_raw(message)
-		if not m_text:
-			reply = await message.get_reply_message()
-			if not reply:
-				await utils.answer(message, self.strings["some_rong"])
-				return
-			long_url = reply.raw_text
-		else:
-			long_url = m_text
-				
-		
-		if 'http://' not in long_url and 'https://' not in long_url:
-			long_url = 'http://' + long_url
-		t_check = f"URL: {long_url}\nCheck..."
-		await utils.answer(message, t_check)
-		check = post('http://gg.gg/check', data={'custom_path': None, 'use_norefs': '0', 'long_url': long_url, 'app': 'site', 'version': '0.1'}).text
-		if check != "ok":
-			await utils.answer(message, check)
-			return
-		await utils.answer(message, "Create...")
-		short = post('http://gg.gg/create', data={'custom_path': None, 'use_norefs': '0', 'long_url': long_url, 'app': 'site', 'version': '0.1'}).text
-		await utils.answer(message, short)
+    """Сокращение ссылок через сервис gg.gg"""
 
+    strings = {
+        "name": "gg.gg",
+        "some_rong": "<b>Ты делаешь что-то не так!\nНапиши</b> <code>.help gg.gg</code> <b>для информации.</b>",
+    }
+
+    async def client_ready(self, client, db):
+        self.client = client
+
+    async def ggcmd(self, message):
+        """.gg <длинная ссылка или реплай на ссылку>"""
+        m_text = utils.get_args_raw(message)
+        if not m_text:
+            reply = await message.get_reply_message()
+            if not reply:
+                await utils.answer(message, self.strings["some_rong"])
+                return
+            long_url = reply.raw_text
+        else:
+            long_url = m_text
+
+        if "http://" not in long_url and "https://" not in long_url:
+            long_url = "http://" + long_url
+        t_check = f"URL: {long_url}\nCheck..."
+        await utils.answer(message, t_check)
+        check = post(
+            "http://gg.gg/check",
+            data={
+                "custom_path": None,
+                "use_norefs": "0",
+                "long_url": long_url,
+                "app": "site",
+                "version": "0.1",
+            },
+        ).text
+        if check != "ok":
+            await utils.answer(message, check)
+            return
+        await utils.answer(message, "Create...")
+        short = post(
+            "http://gg.gg/create",
+            data={
+                "custom_path": None,
+                "use_norefs": "0",
+                "long_url": long_url,
+                "app": "site",
+                "version": "0.1",
+            },
+        ).text
+        await utils.answer(message, short)

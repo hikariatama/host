@@ -9,18 +9,27 @@ Userbot module to help you manage a group
 from asyncio import sleep
 from os import remove
 
-from telethon.errors import (BadRequestError, ChatAdminRequiredError,
-                             ImageProcessFailedError, PhotoCropSizeSmallError,
-                             UserAdminInvalidError)
-from telethon.errors.rpcerrorlist import (UserIdInvalidError,
-                                          MessageTooLongError)
-from telethon.tl.functions.channels import (EditAdminRequest,
-                                            EditBannedRequest,
-                                            EditPhotoRequest)
+from telethon.errors import (
+    BadRequestError,
+    ChatAdminRequiredError,
+    ImageProcessFailedError,
+    PhotoCropSizeSmallError,
+    UserAdminInvalidError,
+)
+from telethon.errors.rpcerrorlist import UserIdInvalidError, MessageTooLongError
+from telethon.tl.functions.channels import (
+    EditAdminRequest,
+    EditBannedRequest,
+    EditPhotoRequest,
+)
 from telethon.tl.functions.messages import UpdatePinnedMessageRequest
-from telethon.tl.types import (ChannelParticipantsAdmins, ChatAdminRights,
-                               ChatBannedRights, MessageEntityMentionName,
-                               MessageMediaPhoto)
+from telethon.tl.types import (
+    ChannelParticipantsAdmins,
+    ChatAdminRights,
+    ChatBannedRights,
+    MessageEntityMentionName,
+    MessageMediaPhoto,
+)
 
 from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot
 from userbot.events import register
@@ -49,9 +58,10 @@ UNBAN_RIGHTS = ChatBannedRights(
     embed_links=None,
 )
 
+
 @register(outgoing=True, pattern="^.zombies(?: |$)(.*)", groups_only=True)
 async def rm_deletedacc(show):
-    """ For .delusers command, list all the ghost/deleted accounts in a chat. """
+    """For .delusers command, list all the ghost/deleted accounts in a chat."""
     if not show.is_group:
         await show.edit("`I don't think this is a group.`")
         return
@@ -90,15 +100,15 @@ async def rm_deletedacc(show):
         if user.deleted:
             try:
                 await show.client(
-                    EditBannedRequest(show.chat_id, user.id, BANNED_RIGHTS))
+                    EditBannedRequest(show.chat_id, user.id, BANNED_RIGHTS)
+                )
             except ChatAdminRequiredError:
                 await show.edit("`I don't have ban rights in this group`")
                 return
             except UserAdminInvalidError:
                 del_u -= 1
                 del_a += 1
-            await show.client(
-                EditBannedRequest(show.chat_id, user.id, UNBAN_RIGHTS))
+            await show.client(EditBannedRequest(show.chat_id, user.id, UNBAN_RIGHTS))
             del_u += 1
 
     if del_u > 0:
@@ -114,30 +124,37 @@ async def rm_deletedacc(show):
 
     if BOTLOG:
         await show.client.send_message(
-            BOTLOG_CHATID, "#CLEANUP\n"
+            BOTLOG_CHATID,
+            "#CLEANUP\n"
             f"Cleaned **{del_u}** deleted account(s) !!\
-            \nCHAT: {show.chat.title}(`{show.chat_id}`)")
+            \nCHAT: {show.chat.title}(`{show.chat_id}`)",
+        )
 
 
 @register(outgoing=True, pattern="^.users ?(.*)", groups_only=True)
 async def get_users(show):
-    """ For .users command, list all of the users in a chat. """
+    """For .users command, list all of the users in a chat."""
     info = await show.client.get_entity(show.chat_id)
     title = info.title or "this chat"
-    mentions = 'Users in {}: \n'.format(title)
+    mentions = "Users in {}: \n".format(title)
     try:
         if not show.pattern_match.group(1):
             async for user in show.client.iter_participants(show.chat_id):
                 if not user.deleted:
-                    mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
+                    mentions += (
+                        f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
+                    )
                 else:
                     mentions += f"\nDeleted Account `{user.id}`"
         else:
             searchq = show.pattern_match.group(1)
             async for user in show.client.iter_participants(
-                    show.chat_id, search=f'{searchq}'):
+                show.chat_id, search=f"{searchq}"
+            ):
                 if not user.deleted:
-                    mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
+                    mentions += (
+                        f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
+                    )
                 else:
                     mentions += f"\nDeleted Account `{user.id}`"
     except ChatAdminRequiredError as err:
@@ -145,22 +162,21 @@ async def get_users(show):
     try:
         await show.edit(mentions)
     except MessageTooLongError:
-        await show.edit(
-            "Damn, this is a huge group. Uploading users lists as file.")
+        await show.edit("Damn, this is a huge group. Uploading users lists as file.")
         with open("userslist.txt", "w+") as file:
             file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "userslist.txt",
-            caption='Users in {}'.format(title),
+            caption="Users in {}".format(title),
             reply_to=show.id,
         )
         remove("userslist.txt")
 
 
 async def get_user_from_event(event):
-    """ Get the user from argument or replied message. """
-    args = event.pattern_match.group(1).split(':', 1)
+    """Get the user from argument or replied message."""
+    args = event.pattern_match.group(1).split(":", 1)
     extra = None
     if event.reply_to_msg_id and len(args) != 2:
         previous_message = await event.get_reply_message()
@@ -181,8 +197,7 @@ async def get_user_from_event(event):
         if event.message.entities is not None:
             probable_user_mention_entity = event.message.entities[0]
 
-            if isinstance(probable_user_mention_entity,
-                          MessageEntityMentionName):
+            if isinstance(probable_user_mention_entity, MessageEntityMentionName):
                 user_id = probable_user_mention_entity.user_id
                 user_obj = await event.client.get_entity(user_id)
                 return user_obj

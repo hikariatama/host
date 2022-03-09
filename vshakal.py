@@ -30,7 +30,7 @@ class VSHAKALMod(loader.Module):
             "3": "0.05M",
             "4": "0.03M",
             "5": "0.02M",
-            "6": "0.01M"
+            "6": "0.01M",
         }
         if args:
             if args in lvls:
@@ -41,19 +41,15 @@ class VSHAKALMod(loader.Module):
             lvl = lvls["3"]
         await m.edit("[Шакал] Качаю...")
         vid = await reply.download_media(
-            "".join(random.choice(string.ascii_letters) for i in range(25))
-            + ".mp4"
+            "".join(random.choice(string.ascii_letters) for i in range(25)) + ".mp4"
         )
 
-        out = (
-            "".join(random.choice(string.ascii_letters) for _ in range(25))
-            + ".mp4"
-        )
-
+        out = "".join(random.choice(string.ascii_letters) for _ in range(25)) + ".mp4"
 
         await m.edit("[Шакал] Шакалю...")
         os.system(
-            f"ffmpeg -y -i \"{vid}\" -b:v {lvl} -maxrate:v {lvl} -b:a {lvl} -maxrate:a {lvl} \"{out}\"")
+            f'ffmpeg -y -i "{vid}" -b:v {lvl} -maxrate:v {lvl} -b:a {lvl} -maxrate:a {lvl} "{out}"'
+        )
         await m.edit("[Шакал] Отправляю...")
         await reply.reply(file=out)
         await m.delete()

@@ -6,14 +6,19 @@ from PIL import Image
 import random
 import string
 
+
 @loader.tds
 class YandexReverseSearchMod(loader.Module):
     """Reverse image search via Yandex (he is the best, imho)"""
-    strings = {"name": "YandexReverseSearch",
-               "search": "⚪⚪⚪\n⚪❓⚪\n⚪⚪⚪",
-               "no_reply": "<b>Reply to image or sticker!</b>",
-               "result": '<a href="{}"><b>🔴⚪🔴|See</b>\n<b>⚪🔴⚪|Search</b>\n<b>⚪🔴⚪|Results</b></a>',
-               "error": '<b>Something went wrong...</b>'}
+
+    strings = {
+        "name": "YandexReverseSearch",
+        "search": "⚪⚪⚪\n⚪❓⚪\n⚪⚪⚪",
+        "no_reply": "<b>Reply to image or sticker!</b>",
+        "result": '<a href="{}"><b>🔴⚪🔴|See</b>\n<b>⚪🔴⚪|Search</b>\n<b>⚪🔴⚪|Results</b></a>',
+        "error": "<b>Something went wrong...</b>",
+    }
+
     @loader.owner
     async def yarscmd(self, message):
         """.yars <repy to image>"""
@@ -23,18 +28,23 @@ class YandexReverseSearchMod(loader.Module):
             await utils.answer(message, self.strings("no_reply", message))
             return
         await utils.answer(message, self.strings("search", message))
-        searchUrl = 'https://yandex.ru/images/search'
-        files = {'upfile': ('blob', data, 'image/jpeg')}
-        params = {'rpt': 'imageview', 'format': 'json', 'request': '{"blocks":[{"block":"b-page_type_search-by-image__link"}]}'}
+        searchUrl = "https://yandex.ru/images/search"
+        files = {"upfile": ("blob", data, "image/jpeg")}
+        params = {
+            "rpt": "imageview",
+            "format": "json",
+            "request": '{"blocks":[{"block":"b-page_type_search-by-image__link"}]}',
+        }
         response = requests.post(searchUrl, params=params, files=files)
         if response.ok:
-            query_string = json.loads(response.content)['blocks'][0]['params']['url']
-            link = searchUrl + '?' + query_string
+            query_string = json.loads(response.content)["blocks"][0]["params"]["url"]
+            link = searchUrl + "?" + query_string
             text = self.strings("result", message).format(link)
             await utils.answer(message, text)
         else:
-        	await utils.answer(message, self.strings("error", message))
-        
+            await utils.answer(message, self.strings("error", message))
+
+
 async def check_media(message, reply):
     if reply and reply.media:
         if reply.photo:

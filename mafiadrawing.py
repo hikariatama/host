@@ -1,8 +1,10 @@
 from .. import loader, utils
 
+
 class MafiaDrawingMod(loader.Module):
     """Модуль ловли подарков в True Mafia News."""
-    strings = {'name': 'MafiaDrawing'}
+
+    strings = {"name": "MafiaDrawing"}
 
     async def client_ready(self, client, db):
         self.db = db
@@ -25,4 +27,5 @@ class MafiaDrawingMod(loader.Module):
             if status and message.chat_id == -1001169391811:
                 click = (await message.click(0)).message
                 await message.client.send_message(me, f"Словлен подарок:\n\n{click}")
-        except: pass
+        except:
+            pass

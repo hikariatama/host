@@ -7,6 +7,7 @@ from pydub import AudioSegment
 from gtts import gTTS
 from subprocess import DEVNULL, STDOUT, check_call
 
+
 def register(cb):
     cb(DttsMod())
 
@@ -14,29 +15,37 @@ def register(cb):
 class DttsMod(loader.Module):
     """Text to speech module"""
 
-    strings = {"name": 'DTTS',
-               "no_text": "I can't say nothing",
-               "tts_lang_cfg": "Set your language code for the TTS here."}
+    strings = {
+        "name": "DTTS",
+        "no_text": "I can't say nothing",
+        "tts_lang_cfg": "Set your language code for the TTS here.",
+    }
 
     def __init__(self):
-        self.config = loader.ModuleConfig("TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m))
-        self.is_ffmpeg = check_call(['ffmpeg', '-version'], stdout=DEVNULL, stderr=STDOUT) == 0
+        self.config = loader.ModuleConfig(
+            "TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m)
+        )
+        self.is_ffmpeg = (
+            check_call(["ffmpeg", "-version"], stdout=DEVNULL, stderr=STDOUT) == 0
+        )
 
     async def say(self, message, speaker, text, file=".dtts.mp3"):
         reply = await message.get_reply_message()
         if not text:
             if not reply:
-                return await utils.answer(message, self.strings['no_text'])
+                return await utils.answer(message, self.strings["no_text"])
             text = reply.raw_text  # use text from reply
         if not text:
-            return await utils.answer(message, self.strings['no_text'])
+            return await utils.answer(message, self.strings["no_text"])
         if message.out:
             await message.delete()  # Delete message only one is user's
         data = {"text": text}
         if speaker:
             data["speaker"] = speaker
         # creating file in memory
-        f = io.BytesIO(requests.get("https://station.aimylogic.com/generate", data=data).content)
+        f = io.BytesIO(
+            requests.get("https://station.aimylogic.com/generate", data=data).content
+        )
         f.name = file
 
         if self.is_ffmpeg:
@@ -44,7 +53,9 @@ class DttsMod(loader.Module):
         else:
             duration = None
 
-        await message.client.send_file(message.chat_id, f, voice_note=True, reply_to=reply, duration=duration)
+        await message.client.send_file(
+            message.chat_id, f, voice_note=True, reply_to=reply, duration=duration
+        )
 
     @loader.unrestricted
     @loader.ratelimit
@@ -91,7 +102,9 @@ class DttsMod(loader.Module):
         else:
             duration = None
 
-        await message.client.send_file(message.chat_id, voice, voice_note=True, reply_to=reply, duration=duration)
+        await message.client.send_file(
+            message.chat_id, voice, voice_note=True, reply_to=reply, duration=duration
+        )
 
 
 def to_voice(item):
@@ -105,5 +118,6 @@ def to_voice(item):
     item.export(m, format="ogg", bitrate="64k", codec="libopus")
     m.seek(0)
     return m, dur
+
 
 # By @vreply @pernel_kanic @nim1love @db0mb3r and add @tshipenchko some geyporn

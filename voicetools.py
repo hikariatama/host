@@ -30,7 +30,7 @@ async def getchattype(message):
         chattype = "channel"
     elif message.is_private:
         chattype = "private"
-    return(chattype)
+    return chattype
 
 
 def represents_nr(nr_lvl):
@@ -65,17 +65,25 @@ async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
         with open(fn + fe, "wb") as f:
             f.write(bytes_io_file.getbuffer())
         bytes_io_file.seek(0)
-        subprocess.call([
-                        "ffmpeg",
-                        "-y",
-                        "-i", fn + fe,
-                        "-c:a", codec,
-                        "-f", new_fe_nodot,
-                        "-ar", "48000",
-                        "-b:a", "320k",
-                        "-ac", ac,
-                        out,
-                        ])
+        subprocess.call(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                fn + fe,
+                "-c:a",
+                codec,
+                "-f",
+                new_fe_nodot,
+                "-ar",
+                "48000",
+                "-b:a",
+                "320k",
+                "-ac",
+                ac,
+                out,
+            ]
+        )
         with open(out, "rb") as f:
             bytes_io_file = BytesIO(f.read())
         bytes_io_file.seek(0)
@@ -106,7 +114,9 @@ async def audiodenoiser(bytes_io_file, fn, fe, nr_lvl):
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     rate, data = wavfile.read(bytes_io_file)
-    reduced_noise = nr.reduce_noise(y=data, sr=rate, prop_decrease=nr_lvl, stationary=False)
+    reduced_noise = nr.reduce_noise(
+        y=data, sr=rate, prop_decrease=nr_lvl, stationary=False
+    )
     wavfile.write(bytes_io_file, rate, reduced_noise)
     fn, fe = os.path.splitext(bytes_io_file.name)
     fn, fe = os.path.splitext(bytes_io_file.name)
@@ -151,9 +161,9 @@ async def dalekvoice(bytes_io_file, fn, fe):
             if v < VB:
                 result[i] = 0
             elif VB < v <= VL:
-                result[i] = H * ((v - VB)**2) / (2 * VL - 2 * VB)
+                result[i] = H * ((v - VB) ** 2) / (2 * VL - 2 * VB)
             else:
-                result[i] = H * v - H * VL + (H * (VL - VB)**2) / (2 * VL - 2 * VB)
+                result[i] = H * v - H * VL + (H * (VL - VB) ** 2) / (2 * VL - 2 * VB)
         return result
 
     def raw_diode(signal):
@@ -163,10 +173,11 @@ async def dalekvoice(bytes_io_file, fn, fe):
             if v < VB:
                 result[i] = 0
             elif VB < v <= VL:
-                result[i] = H * ((v - VB)**2) / (2 * VL - 2 * VB)
+                result[i] = H * ((v - VB) ** 2) / (2 * VL - 2 * VB)
         else:
-            result[i] = H * v - H * VL + (H * (VL - VB)**2) / (2 * VL - 2 * VB)
+            result[i] = H * v - H * VL + (H * (VL - VB) ** 2) / (2 * VL - 2 * VB)
         return result
+
     rate, data = wavfile.read(bytes_io_file)
     data = data[:, 1]
     scaler = np.max(np.abs(data))
@@ -192,7 +203,7 @@ async def dalekvoice(bytes_io_file, fn, fe):
     return bytes_io_file, fn, fe
 
 
-class Waveshaper():
+class Waveshaper:
     def __init__(self, curve):
         self.curve = curve
         self.n_bins = self.curve.shape[0]
@@ -211,30 +222,33 @@ class Waveshaper():
 @loader.tds
 class voicetoolsMod(loader.Module):
     """Change, pitch, enhance your Voice. Also includes optional automatic mode."""
-    strings = {"name": "VoiceTools",
-               "processing": "<b>[VoiceTools]</b> Message is being processed...",
-               "vc_start": "<b>[VoiceTools]</b> Auto VoiceChanger activated.",
-               "vc_stopped": "<b>[VoiceTools]</b> Auto VoiceChanger deactivated.",
-               "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",
-               "vcanon_stopped": "<b>[VoiceTools]</b> Auto AnonVoice deactivated.",
-               "nr_start": "<b>[VoiceTools]</b> Auto VoiceEnhancer activated.",
-               "nr_stopped": "<b>[VoiceTools]</b> Auto VoiceEnhancer deactivated.",
-               "norm_start": "<b>[VoiceTools]</b> Auto VoiceNormalizer activated.",
-               "norm_stopped": "<b>[VoiceTools]</b> Auto VoiceNormalizer deactivated.",
-               "pitch_start": "<b>[VoiceTools]</b> Auto VoicePitch activated.",
-               "pitch_stopped": "<b>[VoiceTools]</b> Auto VoicePitch deactivated.",
-               "vtauto_stopped": "<b>[VoiceTools]</b> Auto Voice Tools deactivated.",
-               "error_file": "<b>[VoiceTools] No file in the reply detected.</b>",
-               "nr_level": ("<b>[VoiceTools]</b> Noise reduction level set to {}."),
-               "pitch_level": ("<b>[VoiceTools]</b> Pitch level set to {}."),
-               "no_nr": "<b>[VoiceTools]</b> Your input was an unsupported noise reduction level.",
-               "no_pitch": "<b>[VoiceTools]</b> Your input was an unsupported pitch level.",
-               "audiohandler_txt": "<b>[VoiceTools]</b> Audio is being transcoded.",
-               "audiodenoiser_txt": "<b>[VoiceTools]</b> Background noise is being removed.",
-               "audionormalizer_txt": "<b>[VoiceTools]</b> Audiovolume is being normalized.",
-               "dalekvoice_txt": "<b>[VoiceTools]</b> Dalek Voice is being applied.",
-               "pitch_txt": "<b>[VoiceTools]</b> Pitch is being applied.",
-               "makewaves_txt": "<b>[VoiceTools]</b> Speech waves are being applied."}
+
+    strings = {
+        "name": "VoiceTools",
+        "processing": "<b>[VoiceTools]</b> Message is being processed...",
+        "vc_start": "<b>[VoiceTools]</b> Auto VoiceChanger activated.",
+        "vc_stopped": "<b>[VoiceTools]</b> Auto VoiceChanger deactivated.",
+        "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",
+        "vcanon_stopped": "<b>[VoiceTools]</b> Auto AnonVoice deactivated.",
+        "nr_start": "<b>[VoiceTools]</b> Auto VoiceEnhancer activated.",
+        "nr_stopped": "<b>[VoiceTools]</b> Auto VoiceEnhancer deactivated.",
+        "norm_start": "<b>[VoiceTools]</b> Auto VoiceNormalizer activated.",
+        "norm_stopped": "<b>[VoiceTools]</b> Auto VoiceNormalizer deactivated.",
+        "pitch_start": "<b>[VoiceTools]</b> Auto VoicePitch activated.",
+        "pitch_stopped": "<b>[VoiceTools]</b> Auto VoicePitch deactivated.",
+        "vtauto_stopped": "<b>[VoiceTools]</b> Auto Voice Tools deactivated.",
+        "error_file": "<b>[VoiceTools] No file in the reply detected.</b>",
+        "nr_level": ("<b>[VoiceTools]</b> Noise reduction level set to {}."),
+        "pitch_level": ("<b>[VoiceTools]</b> Pitch level set to {}."),
+        "no_nr": "<b>[VoiceTools]</b> Your input was an unsupported noise reduction level.",
+        "no_pitch": "<b>[VoiceTools]</b> Your input was an unsupported pitch level.",
+        "audiohandler_txt": "<b>[VoiceTools]</b> Audio is being transcoded.",
+        "audiodenoiser_txt": "<b>[VoiceTools]</b> Background noise is being removed.",
+        "audionormalizer_txt": "<b>[VoiceTools]</b> Audiovolume is being normalized.",
+        "dalekvoice_txt": "<b>[VoiceTools]</b> Dalek Voice is being applied.",
+        "pitch_txt": "<b>[VoiceTools]</b> Pitch is being applied.",
+        "makewaves_txt": "<b>[VoiceTools]</b> Speech waves are being applied.",
+    }
 
     def __init__(self):
         self._ratelimit = []
@@ -342,8 +356,8 @@ class voicetoolsMod(loader.Module):
 
     async def vtpitchcmd(self, message):
         """reply to a file to pitch voice
-          - Example: .vtpitch 12
-            Possible values between -18 and 18"""
+        - Example: .vtpitch 12
+          Possible values between -18 and 18"""
         chatid = message.chat_id
         if message.is_reply:
             replymsg = await message.get_reply_message()
@@ -389,8 +403,8 @@ class voicetoolsMod(loader.Module):
 
     async def vtenhcmd(self, message):
         """reply to a file to enhance voice quality with
-         - Volume normalize
-         - Background NoiseReduce (set your noisereduce level before)"""
+        - Volume normalize
+        - Background NoiseReduce (set your noisereduce level before)"""
         chatid = message.chat_id
         if message.is_reply:
             replymsg = await message.get_reply_message()
@@ -546,23 +560,27 @@ class voicetoolsMod(loader.Module):
 
     async def vtnrlvlcmd(self, message):
         """Set the desired noisereduce level
-          - Example: .vtnrlvl 0.8 (Would be 80%)
-            Possible values between 0.01 and 1.0"""
+        - Example: .vtnrlvl 0.8 (Would be 80%)
+          Possible values between 0.01 and 1.0"""
         nr_lvl = utils.get_args_raw(message)
         if not represents_nr(nr_lvl):
             return await utils.answer(message, self.strings("no_nr", message))
         self._db.set(__name__, "nr_lvl", nr_lvl)
-        await utils.answer(message, self.strings("nr_level", message).format(f"{float(nr_lvl):.0%}"))
+        await utils.answer(
+            message, self.strings("nr_level", message).format(f"{float(nr_lvl):.0%}")
+        )
 
     async def vtpitchlvlcmd(self, message):
         """Set the desired pitch level
-          - Example: .vtpitchlvl 12 (Would be 80%)
-            Possible values between -18 and 18"""
+        - Example: .vtpitchlvl 12 (Would be 80%)
+          Possible values between -18 and 18"""
         pitch_lvl = utils.get_args_raw(message)
         if not represents_pitch(pitch_lvl):
             return await utils.answer(message, self.strings("no_pitch", message))
         self._db.set(__name__, "pitch_lvl", pitch_lvl)
-        await utils.answer(message, self.strings("pitch_level", message).format(pitch_lvl))
+        await utils.answer(
+            message, self.strings("pitch_level", message).format(pitch_lvl)
+        )
 
     async def vtautovccmd(self, message):
         """Turns on AutoVoiceChanger for your own Voicemessages in the chat"""
@@ -670,11 +688,13 @@ class voicetoolsMod(loader.Module):
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
         chat = await message.get_chat()
         chattype = await getchattype(message)
-        if (chatid_str not in nr_chats
-                and chatid_str not in vc_chats
-                and chatid_str not in norm_chats
-                and chatid_str not in pitch_chats
-                and chatid_str not in vcanon_chats):
+        if (
+            chatid_str not in nr_chats
+            and chatid_str not in vc_chats
+            and chatid_str not in norm_chats
+            and chatid_str not in pitch_chats
+            and chatid_str not in vcanon_chats
+        ):
             return
         if chattype != "channel":
             if message.sender_id != self._id:
@@ -725,10 +745,18 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        if chatid_str in nr_chats or chatid_str in vcanon_chats or chatid_str in vc_chats:
+        if (
+            chatid_str in nr_chats
+            or chatid_str in vcanon_chats
+            or chatid_str in vc_chats
+        ):
             file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
             file.seek(0)
-        if chatid_str in norm_chats or chatid_str in vcanon_chats or chatid_str in vc_chats:
+        if (
+            chatid_str in norm_chats
+            or chatid_str in vcanon_chats
+            or chatid_str in vc_chats
+        ):
             file, fn, fe = await audionormalizer(file, fn, fe)
             file.seek(0)
         if chatid_str in vc_chats or chatid_str in vcanon_chats:
