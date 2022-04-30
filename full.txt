@@ -20,7 +20,7 @@ fake_actions
 farmiris
 gg.gg
 GitUploader
-Google Translator
+translator
 id3_editor
 imageeditor
 image_tools
